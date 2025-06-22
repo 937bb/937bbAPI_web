@@ -19,6 +19,16 @@ export async function $apiFetch(path, options = {}) {
     ...(method !== 'GET' && body ? { body } : {})
   }
   const res = await fetch(url, fetchOptions)
-  if (!res.ok) throw new Error('请求失败: ' + res.status)
-  return await res.json()
+  let data
+  try {
+    data = await res.json()
+  } catch (e) {
+    data = null
+  }
+  if (!res.ok) {
+    // 优先抛出后端msg
+    if (data && data.msg) throw new Error(data.msg)
+    throw new Error('请求失败: ' + res.status)
+  }
+  return data
 }

@@ -1,0 +1,10 @@
+[build]
+  command = "pnpm generate"
+  publish = ".output/public"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_TOKEN = "${NPM_TOKEN}"
+
+[context.production.environment]
+  NODE_ENV = "production"

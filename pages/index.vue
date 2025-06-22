@@ -1,357 +1,648 @@
 <template>
-  <div class="home">
-    <header class="main-header">
-      <div class="stats-bar">
-        <span>API 总数：<b>{{ apiCount }}</b></span>
-        <span>总调用次数：<b>{{ totalRequestCount }}</b></span>
-      </div>
-      <div class="search-bar">
-        <input v-model="searchText" type="text" placeholder="搜索 API 名称/描述..." @input="onSearch" />
-        <button @click="onSearch">搜索</button>
-      </div>
-    </header>
-
-    <!-- 最新发布区域 -->
-    <section class="section-block">
-      <h2><i class="iconfont">🔥</i> 最新发布</h2>
-      <ul class="latest-list">
-        <li v-for="api in latestApis" :key="api.id">
-          <nuxt-link :to="`/api/${api.id}`" class="api-link-latest">
-            <div class="api-card-header">
-              <span class="api-title">{{ api.title }}</span>
-              <span class="api-method" :class="api.method.toLowerCase()">{{ api.method }}</span>
-            </div>
-            <div class="api-summary">{{ api.summary }}</div>
-            <div class="api-url">{{ api.url }}</div>
-          </nuxt-link>
-        </li>
-      </ul>
-    </section>
-
-    <!-- API 列表区域 -->
-    <section class="section-block">
-      <h2><i class="iconfont">📚</i> API 列表</h2>
-      <ul class="api-list">
-        <li v-for="api in apis" :key="api.id">
-          <nuxt-link :to="`/api/${api.id}`" class="api-link">
-            <div class="api-card-header">
-              <span class="api-title">{{ api.title }}</span>
-              <span class="api-method" :class="api.method.toLowerCase()">{{ api.method }}</span>
-            </div>
-            <div class="api-summary">{{ api.summary }}</div>
-            <div class="api-url">{{ api.url }}</div>
-          </nuxt-link>
-        </li>
-      </ul>
-    </section>
-  </div>
+	<div class="main-bg">
+		<div class="main-content">
+			<!-- 顶部横幅 -->
+			<header class="hero">
+				<div class="hero-inner">
+					<div class="hero-title">937bbAPI</div>
+					<div class="hero-slogan">最全、最易用的免费API接口导航站</div>
+					<div class="hero-stats">
+						<div class="hero-stat">
+							<span>{{ apiCount }}</span> 个API
+						</div>
+						<div class="hero-stat">
+							<span>{{ totalRequestCount }}</span> 次调用
+						</div>
+					</div>
+				</div>
+			</header>
+			<!-- 搜索区 -->
+			<div class="search-bar">
+				<input v-model="searchText" @input="onSearch" type="text" class="search-input" placeholder="🔍 输入关键词搜索API..." />
+			</div>
+			<!-- 分组Tab -->
+			<nav class="group-tabs" v-if="groupNames.length > 1">
+				<div v-for="(name, idx) in groupNames" :key="name" :class="['group-tab', { active: name === activeGroup }]" @click="activeGroup = name">
+					{{ name }}
+				</div>
+			</nav>
+			<!-- API卡片区 -->
+			<div class="api-list">
+				<div v-for="api in filteredApis" :key="api.id" class="api-card" @click="goDetail(api.id)">
+					<div class="api-card-title">
+						<span class="api-card-method" :class="api.method && api.method.toLowerCase()">{{ api.method }}</span>
+						{{ api.title }}
+					</div>
+					<div class="api-card-summary">{{ api.summary }}</div>
+					<div class="api-card-meta">
+						<span class="api-card-group">{{ api.group }}</span>
+						<span class="api-card-count">{{ api.requestCount }} 次调用</span>
+					</div>
+				</div>
+				<div v-if="filteredApis.length === 0" class="api-empty">暂无符合条件的API</div>
+			</div>
+		</div>
+		<!-- 页脚 -->
+		<footer class="footer">
+			<div class="footer-inner">
+				<div class="footer-text">
+					&copy; 2025 937bbAPI | <a href="mailto:hi@vvhan.com" class="footer-link">hi@vvhan.com</a>
+					<span class="footer-link">
+						<a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2023000000号</a>
+					</span>
+				</div>
+			</div>
+		</footer>
+	</div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRuntimeConfig } from '#imports'
-const config = useRuntimeConfig()
-const siteName = config.public.siteName || '937bb——API 聚合站'
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { $apiFetch } from "~/utils/apiFetch.js";
 
-// 搜索相关
-const searchText = ref('')
-const latestApis = ref([
-  {
-    id: '1',
-    title: '二维码生成API',
-    summary: '快速生成二维码图片',
-    url: '/api/qr',
-    method: 'GET',
-    createTime: '2025-06-20',
-    requestCount: 1234
-  }
-])
-const apisOrigin = [
-  {
-    id: '1',
-    title: '二维码生成API',
-    summary: '快速生成二维码图片',
-    url: '/api/qr',
-    method: 'GET',
-    createTime: '2025-06-20',
-    requestCount: 1234
-  },
-  {
-    id: '2',
-    title: '每日一言API',
-    summary: '获取每日一句有趣的话',
-    url: '/api/yy',
-    method: 'GET',
-    createTime: '2025-06-18',
-    requestCount: 888
-  }
-]
-const apis = ref([...apisOrigin])
+const router = useRouter();
+const goDetail = (id) => {
+	router.push(`/api/${id}`);
+};
 
-function onSearch() {
-  const text = searchText.value.trim().toLowerCase()
-  if (!text) {
-    apis.value = [...apisOrigin]
-    return
-  }
-  apis.value = apisOrigin.filter(api =>
-    api.title.toLowerCase().includes(text) ||
-    api.summary.toLowerCase().includes(text)
-  )
+const searchText = ref("");
+const apis = ref([]);
+async function fetchApis() {
+	// TODO: 替换为真实接口
+	// const res = await $apiFetch('/api/apis')
+	// apis.value = res.data
+	apis.value = [
+		{
+			id: "1",
+			title: "二维码生成API",
+			summary: "快速生成二维码图片",
+			url: "/api/qr",
+			method: "GET",
+			createTime: "2025-06-20",
+			requestCount: 1234,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "2",
+			title: "每日一言API",
+			summary: "获取每日一句有趣的话",
+			url: "/api/yy",
+			method: "GET",
+			createTime: "2025-06-18",
+			requestCount: 888,
+			group: "娱乐类",
+			status: "active",
+		},
+		{
+			id: "3",
+			title: "天气查询API",
+			summary: "获取实时天气信息",
+			url: "/api/weather",
+			method: "GET",
+			createTime: "2025-06-15",
+			requestCount: 1560,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "4",
+			title: "星座运势API",
+			summary: "查询今日星座运势",
+			url: "/api/astro",
+			method: "GET",
+			createTime: "2025-06-10",
+			requestCount: 900,
+			group: "娱乐类",
+			status: "active",
+		},
+		{
+			id: "5",
+			title: "短网址生成API",
+			summary: "将长链接转为短网址",
+			url: "/api/shorturl",
+			method: "POST",
+			createTime: "2025-06-12",
+			requestCount: 700,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "6",
+			title: "随机头像API",
+			summary: "获取随机头像图片",
+			url: "/api/avatar",
+			method: "GET",
+			createTime: "2025-06-11",
+			requestCount: 1200,
+			group: "图片类",
+			status: "active",
+		},
+		{
+			id: "7",
+			title: "笑话API",
+			summary: "获取随机笑话",
+			url: "/api/joke",
+			method: "GET",
+			createTime: "2025-06-09",
+			requestCount: 1100,
+			group: "娱乐类",
+			status: "active",
+		},
+		{
+			id: "8",
+			title: "翻译API",
+			summary: "中英互译",
+			url: "/api/translate",
+			method: "POST",
+			createTime: "2025-06-08",
+			requestCount: 800,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "9",
+			title: "图片鉴黄API",
+			summary: "检测图片内容安全",
+			url: "/api/nsfw",
+			method: "POST",
+			createTime: "2025-06-07",
+			requestCount: 600,
+			group: "图片类",
+			status: "active",
+		},
+		{
+			id: "10",
+			title: "表情包API",
+			summary: "获取热门表情包",
+			url: "/api/emotion",
+			method: "GET",
+			createTime: "2025-06-06",
+			requestCount: 950,
+			group: "图片类",
+			status: "active",
+		},
+		{
+			id: "11",
+			title: "成语接龙API",
+			summary: "玩成语接龙游戏",
+			url: "/api/idiom",
+			method: "GET",
+			createTime: "2025-06-05",
+			requestCount: 500,
+			group: "娱乐类",
+			status: "active",
+		},
+		{
+			id: "12",
+			title: "手机号归属地API",
+			summary: "查询手机号归属地",
+			url: "/api/phone",
+			method: "GET",
+			createTime: "2025-06-04",
+			requestCount: 400,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "13",
+			title: "随机壁纸API",
+			summary: "获取高清壁纸",
+			url: "/api/wallpaper",
+			method: "GET",
+			createTime: "2025-06-03",
+			requestCount: 1300,
+			group: "图片类",
+			status: "active",
+		},
+		{
+			id: "14",
+			title: "历史上的今天API",
+			summary: "查询历史事件",
+			url: "/api/history",
+			method: "GET",
+			createTime: "2025-06-02",
+			requestCount: 300,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "15",
+			title: "诗词推荐API",
+			summary: "获取古诗词推荐",
+			url: "/api/poem",
+			method: "GET",
+			createTime: "2025-06-01",
+			requestCount: 200,
+			group: "娱乐类",
+			status: "active",
+		},
+		{
+			id: "16",
+			title: "图片加水印API",
+			summary: "为图片添加水印",
+			url: "/api/watermark",
+			method: "POST",
+			createTime: "2025-05-30",
+			requestCount: 350,
+			group: "图片类",
+			status: "active",
+		},
+		{
+			id: "17",
+			title: "身份证识别API",
+			summary: "识别身份证信息",
+			url: "/api/idcard",
+			method: "POST",
+			createTime: "2025-05-29",
+			requestCount: 250,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "18",
+			title: "二维码识别API",
+			summary: "识别二维码内容",
+			url: "/api/qrscan",
+			method: "POST",
+			createTime: "2025-05-28",
+			requestCount: 150,
+			group: "工具类",
+			status: "active",
+		},
+		{
+			id: "19",
+			title: "动漫头像API",
+			summary: "获取动漫风格头像",
+			url: "/api/animeavatar",
+			method: "GET",
+			createTime: "2025-05-27",
+			requestCount: 100,
+			group: "图片类",
+			status: "active",
+		},
+		{
+			id: "20",
+			title: "随机名言API",
+			summary: "获取一句名言",
+			url: "/api/quote",
+			method: "GET",
+			createTime: "2025-05-26",
+			requestCount: 50,
+			group: "娱乐类",
+			status: "active",
+		},
+	];
 }
-
-// 统计
-const apiCount = computed(() => apisOrigin.length)
-const totalRequestCount = computed(() => apisOrigin.reduce((sum, api) => sum + (api.requestCount || 0), 0))
+onMounted(() => {
+	fetchApis();
+});
+const apiCount = computed(() => apis.value.length);
+const totalRequestCount = computed(() => apis.value.reduce((acc, api) => acc + api.requestCount, 0));
+const groupNames = computed(() => {
+	const set = new Set(apis.value.map((a) => a.group));
+	return Array.from(set);
+});
+const activeGroup = ref("");
+onMounted(() => {
+	fetchApis();
+	activeGroup.value = groupNames.value[0] || "";
+});
+const filteredApis = computed(() => {
+	let list = apis.value;
+	if (activeGroup.value) list = list.filter((a) => a.group === activeGroup.value);
+	if (searchText.value.trim()) {
+		const kw = searchText.value.trim().toLowerCase();
+		list = list.filter(
+			(api) =>
+				api.title.toLowerCase().includes(kw) ||
+				api.summary.toLowerCase().includes(kw) ||
+				(api.description && api.description.toLowerCase().includes(kw)) ||
+				(api.group && api.group.toLowerCase().includes(kw))
+		);
+	}
+	return list;
+});
+const onSearch = () => {};
 </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
-.home {
-  max-width: 1440px;
-  margin: 40px auto 0 auto;
-  padding: 40px 24px 60px 24px;
-  background: linear-gradient(135deg, #f6f7fb 0%, #f0f4f8 100%);
-  border-radius: 24px;
-  box-shadow: 0 8px 40px 0 rgba(60,80,120,0.08);
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
 }
-.main-header {
-  background: linear-gradient(90deg, #f7fafc 0%, #e3e8f0 100%);
-  padding: 32px 0 18px 0;
-  box-shadow: 0 2px 12px 0 rgba(60,80,120,0.06);
-  border-bottom: 2px solid #e3eaf2;
-  margin-bottom: 40px;
+*, *::before, *::after {
+  box-sizing: inherit;
 }
-.header-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  text-align: center;
+.main-bg {
+	background: linear-gradient(180deg, #f8fafc 0%, #eaf6ff 100%);
+	min-height: 100vh;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
 }
-.site-title {
-  font-family: 'Montserrat', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2b3a55;
-  margin-bottom: 8px;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 12px rgba(43,58,85,0.06);
+.main-content {
+	flex: 1 0 auto;
+	display: flex;
+	flex-direction: column;
 }
-.site-desc {
-  color: #7a869a;
-  font-size: 1rem;
-  margin-bottom: 0;
+.hero {
+	width: 100%;
+	background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
+	padding: 48px 0 32px 0;
+	color: #fff;
+	box-shadow: 0 4px 24px 0 rgba(56, 189, 248, 0.08);
 }
-.stats-bar {
-  font-size: 0.98rem;
-  color: #3b5998;
-  font-weight: 600;
+.hero-inner {
+	max-width: 900px;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 18px;
 }
-.stats-bar b {
-  color: #ff9800;
-  font-size: 1.08rem;
+.hero-title {
+	font-size: 2.8rem;
+	font-weight: 900;
+	letter-spacing: 2px;
+}
+.hero-slogan {
+	font-size: 1.25rem;
+	opacity: 0.92;
+	margin-bottom: 8px;
+}
+.hero-stats {
+	display: flex;
+	gap: 32px;
+	font-size: 1.1rem;
+}
+.hero-stat span {
+	font-size: 1.5rem;
+	font-weight: bold;
+	margin-right: 6px;
 }
 .search-bar {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px 0 rgba(60,80,120,0.06);
-  border: 1.5px solid #e3eaf2;
-  width: 340px;
-  margin: 12px auto 0 auto;
-  display: flex;
-  align-items: center;
-  padding: 4px 10px;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	margin-top: -28px;
+	margin-bottom: 32px;
 }
-.search-bar input {
-  width: 200px;
-  padding: 7px 12px;
-  border: none;
-  border-radius: 8px 0 0 8px;
-  font-size: 1rem;
-  outline: none;
-  background: transparent;
-  color: #2b3a55;
+.search-input {
+	width: 100%;
+	max-width: 420px;
+	padding: 16px 24px;
+	border-radius: 14px;
+	border: 1.5px solid #e0e7ef;
+	font-size: 1.13rem;
+	background: #fff;
+	color: #222;
+	outline: none;
+	transition: border 0.2s, box-shadow 0.2s;
+	box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.04);
 }
-.search-bar input:focus {
-  background: #f6f7fb;
+.search-input:focus {
+	border-color: #6366f1;
+	box-shadow: 0 0 0 2px #c7d2fe;
 }
-.search-bar button {
-  padding: 7px 18px;
-  background: linear-gradient(90deg, #3b5998 0%, #5b86e5 100%);
-  color: #fff;
-  border: none;
-  border-radius: 0 8px 8px 0;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  box-shadow: 0 1px 4px 0 rgba(60,80,120,0.04);
+.group-tabs {
+	display: flex;
+	gap: 18px;
+	justify-content: center;
+	margin-bottom: 32px;
+	flex-wrap: wrap;
 }
-.search-bar button:hover {
-  background: linear-gradient(90deg, #5b86e5 0%, #3b5998 100%);
+.group-tab {
+	padding: 8px 22px;
+	border-radius: 999px;
+	background: #f1f5f9;
+	color: #6366f1;
+	font-weight: 600;
+	font-size: 1.08rem;
+	cursor: pointer;
+	transition: background 0.2s, color 0.2s;
+	border: 1.5px solid transparent;
 }
-.section-block {
-  margin-bottom: 40px;
+.group-tab.active,
+.group-tab:hover {
+	background: #6366f1;
+	color: #fff;
+	border-color: #6366f1;
 }
-.section-block h2 {
-  font-size: 1.1rem;
-  color: #2b3a55;
-  margin-bottom: 18px;
-  border-left: 5px solid #5b86e5;
-  padding-left: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.api-list {
+	max-width: 1100px;
+	margin: 0 auto 48px auto;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 36px 28px;
 }
-.latest-list, .api-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
+.api-card {
+	background: #fff;
+	border-radius: 18px;
+	box-shadow: 0 2px 16px 0 rgba(56, 189, 248, 0.07);
+	border: 1.5px solid #e0e7ef;
+	padding: 28px 24px 18px 24px;
+	cursor: pointer;
+	transition: box-shadow 0.2s, border 0.2s, transform 0.18s;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
-@media (max-width: 1100px) {
-  .latest-list, .api-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.api-card:hover {
+	box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.13);
+	border-color: #6366f1;
+	transform: translateY(-4px) scale(1.025);
+}
+.api-card-title {
+	font-size: 1.18rem;
+	font-weight: bold;
+	color: #22223b;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.api-card-method {
+	display: inline-block;
+	padding: 2px 14px;
+	border-radius: 999px;
+	font-size: 0.98rem;
+	font-weight: 700;
+	background: #e0f2fe;
+	color: #0284c7;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	margin-right: 8px;
+}
+.api-card-method.get {
+	background: #dcfce7;
+	color: #16a34a;
+}
+.api-card-method.post {
+	background: #fee2e2;
+	color: #b91c1c;
+}
+.api-card-method.put {
+	background: #fef9c3;
+	color: #b45309;
+}
+.api-card-method.delete {
+	background: #fee2e2;
+	color: #b91c1c;
+}
+.api-card-summary {
+	color: #6b7280;
+	font-size: 1.05rem;
+	min-height: 32px;
+}
+.api-card-meta {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.98rem;
+	color: #8b949e;
+}
+.api-card-group {
+	background: #f1f5f9;
+	border-radius: 6px;
+	padding: 2px 10px;
+	color: #6366f1;
+	font-size: 0.98rem;
+}
+.api-card-count {
+	color: #0284c7;
+}
+.api-empty {
+	grid-column: 1/-1;
+	text-align: center;
+	color: #bbb;
+	font-size: 1.1rem;
+	padding: 32px 0;
+}
+.footer {
+	width: 100%;
+	background: #f8fafc;
+	border-top: 1.5px solid #e0e7ef;
+	padding: 32px 0 18px 0;
+	margin-top: 32px;
+	flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+}
+.footer-inner {
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 0 32px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+.footer-text {
+	color: #8b949e;
+	font-size: 15px;
+	text-align: center;
+}
+.footer-link {
+	color: #0284c7;
+	text-decoration: underline;
+	margin-left: 8px;
+}
+@media (max-width: 1200px) {
+	.api-list {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 @media (max-width: 900px) {
-  .home {
-    padding: 10px 2vw 24px 2vw;
-    border-radius: 0;
-    max-width: 100vw;
-  }
-  .main-header {
-    padding: 18px 0 10px 0;
-    margin-bottom: 24px;
-  }
-  .stats-bar {
-    flex-direction: column;
-    gap: 8px;
-    font-size: 0.92rem;
-  }
-  .search-bar {
-    width: 98vw;
-    min-width: 0;
-    max-width: 98vw;
-    padding: 4px 2vw;
-  }
-  .section-block {
-    margin-bottom: 24px;
-  }
-  .latest-list, .api-list {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .api-link, .api-link-latest {
-    padding: 12px 6px 10px 6px;
-    border-radius: 10px;
-  }
-  .api-title {
-    font-size: 0.98rem;
-  }
-  .api-summary, .api-url, .api-method {
-    font-size: 0.9rem;
-  }
+	.hero-inner {
+		max-width: 98vw;
+	}
+	.api-list {
+		grid-template-columns: 1fr;
+		gap: 18px 0;
+	}
+	.footer-inner {
+		max-width: 98vw;
+	}
 }
 @media (max-width: 700px) {
-  .latest-list, .api-list {
-    grid-template-columns: 1fr;
-  }
-  .home {
-    padding: 10px 2vw 24px 2vw;
-    border-radius: 0;
-  }
-  .main-header h1 {
-    font-size: 1.5rem;
-  }
-  .section-block h2 {
-    font-size: 1.1rem;
-    padding-left: 6px;
-  }
-  .api-link, .api-link-latest {
-    padding: 14px 10px 12px 10px;
-  }
-  .api-title {
-    font-size: 1rem;
-  }
-  .api-summary, .api-url, .api-method {
-    font-size: 0.92rem;
-  }
-}
-.api-link, .api-link-latest {
-  display: block;
-  background: linear-gradient(120deg, #f7fafc 0%, #e3e8f0 100%);
-  border-radius: 14px;
-  padding: 20px 22px 16px 22px;
-  text-decoration: none;
-  transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
-  box-shadow: 0 2px 12px 0 rgba(60,80,120,0.06);
-  border: 1.5px solid #e3eaf2;
-  color: #2b3a55;
-  position: relative;
-  overflow: hidden;
-}
-.api-link:hover, .api-link-latest:hover {
-  background: linear-gradient(120deg, #5b86e5 0%, #36d1c4 100%);
-  color: #fff;
-  box-shadow: 0 8px 32px 0 rgba(91,134,229,0.18);
-  transform: translateY(-2px) scale(1.02);
-}
-.api-link:hover .api-title,
-.api-link-latest:hover .api-title,
-.api-link:hover .api-summary,
-.api-link-latest:hover .api-summary,
-.api-link:hover .api-method,
-.api-link-latest:hover .api-method,
-.api-link:hover .api-url,
-.api-link-latest:hover .api-url {
-  color: #fff !important;
-}
-.api-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-.api-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #3b5998;
-  letter-spacing: 1px;
-}
-.api-method {
-  font-size: 0.92rem;
-  font-weight: 600;
-  padding: 2px 12px;
-  border-radius: 8px;
-  background: #e3eaf2;
-  color: #5b86e5;
-  margin-left: 8px;
-  box-shadow: 0 1px 4px 0 rgba(60,80,120,0.04);
-}
-.api-method.get {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-.api-method.post {
-  background: #fff7e6;
-  color: #ff9800;
-}
-.api-summary {
-  font-size: 0.95rem;
-  color: #7a869a;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-.api-url {
-  font-size: 0.92rem;
-  color: #36d1c4;
-  background: #e0f7fa;
-  border-radius: 6px;
-  padding: 2px 10px;
-  margin-top: 6px;
-  display: inline-block;
+	.hero {
+		padding: 32px 0 18px 0;
+	}
+	.hero-title {
+		font-size: 1.3rem;
+	}
+	.hero-slogan {
+		font-size: 0.98rem;
+	}
+	.hero-stats {
+		font-size: 0.98rem;
+		gap: 12px;
+	}
+	.hero-stat span {
+		font-size: 1.1rem;
+	}
+	.search-bar {
+		margin-top: -18px;
+		margin-bottom: 18px;
+	}
+	.search-input {
+		font-size: 0.98rem;
+		padding: 8px 10px;
+		border-radius: 8px;
+	}
+	.group-tabs {
+		gap: 8px;
+		margin-bottom: 16px;
+	}
+	.group-tab {
+		font-size: 0.98rem;
+		padding: 6px 12px;
+	}
+	.api-list {
+		grid-template-columns: 1fr;
+		gap: 12px 0;
+		padding-left: 2px;
+		padding-right: 2px;
+		/* width: 100vw; */
+		max-width: 100vw;
+		margin-left: 0;
+		margin-right: 0;
+		box-sizing: border-box;
+	}
+	.api-card {
+		width: 100%;
+		box-sizing: border-box;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+	.api-card {
+		padding: 14px 8px 10px 8px;
+		border-radius: 10px;
+	}
+	.api-card-title {
+		font-size: 1rem;
+	}
+	.api-card-summary {
+		font-size: 0.95rem;
+	}
+	.api-card-meta {
+		font-size: 0.92rem;
+	}
+	.footer {
+		position: fixed;
+		padding: 14px 0 8px 0;
+		margin-top: 18px;
+      bottom: 0;
+	}
+	.footer-inner {
+		padding: 0 4px;
+		gap: 4px;
+	}
+	.footer-text {
+		font-size: 13px;
+	}
 }
 </style>

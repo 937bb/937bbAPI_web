@@ -1,100 +1,94 @@
 <template>
-  <div class="api-detail">
-    <!-- 顶部信息卡片，悬浮阴影+渐变背景 -->
-    <header class="detail-header modern-card">
-      <h1>{{ api.title }}</h1>
-      <p class="api-summary">{{ api.summary }}</p>
-      <div class="api-meta">
-        <span class="api-method" :class="api.method && api.method.toLowerCase()">{{ api.method }}</span>
-        <!-- 复制按钮区域，图标+文字，动画提示 -->
-        <span class="api-url-full copyable" @click="copyApiUrl" @mousedown="copyActive=true" @mouseup="copyActive=false" :class="{active: copyActive}">
-          <svg class="copy-icon" viewBox="0 0 20 20" width="18" height="18"><path fill="currentColor" d="M7 2a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6.83A2 2 0 0 0 14.41 6L11.41 3A2 2 0 0 0 10.17 2H7zm0 2h3.17L15 6.83V14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"></path></svg>
-          <span class="copy-url-text">{{ fullApiUrl }}</span>
-          <span class="copy-btn-text">复制</span>
-        </span>
-        <span class="api-count"><svg width="16" height="16" viewBox="0 0 20 20" style="vertical-align:middle;margin-right:2px;"><circle cx="10" cy="10" r="8" fill="#faad14" opacity=".15"/><path d="M10 5v5l3 3" stroke="#faad14" stroke-width="2" fill="none" stroke-linecap="round"/></svg>请求次数：{{ api.requestCount }}</span>
-        <span class="api-time"><svg width="16" height="16" viewBox="0 0 20 20" style="vertical-align:middle;margin-right:2px;"><path d="M10 2a8 8 0 1 1 0 16a8 8 0 0 1 0-16z" fill="#aaa" opacity=".12"/><path d="M10 5v5l3 3" stroke="#aaa" stroke-width="2" fill="none" stroke-linecap="round"/></svg>创建时间：{{ formatDate(api.createTime) }}</span>
+  <div class="detail-bg">
+    <div class="detail-main">
+      <!-- 顶部横幅 -->
+      <header class="detail-hero">
+        <div class="detail-hero-inner">
+          <div class="detail-hero-title">{{ api.title }}</div>
+          <div class="detail-hero-summary">{{ api.summary }}</div>
+          <div class="detail-hero-meta">
+            <span class="detail-method-badge" :class="api.method && api.method.toLowerCase()">{{ api.method }}</span>
+            <span class="detail-hero-date">创建于 {{ formatDate(api.createTime) }}</span>
+            <span class="detail-hero-count">{{ api.requestCount }} 次调用</span>
+            <button class="detail-copy-btn" @click="copyApiUrl">
+              <span v-if="copyActive">已复制</span>
+              <span v-else>复制URL</span>
+            </button>
+          </div>
+          <transition name="fade">
+            <div v-if="copyTip" class="detail-copy-tip">已复制到剪贴板</div>
+          </transition>
+        </div>
+      </header>
+      <!-- 内容区 -->
+      <div class="detail-content">
+        <div class="detail-section-block">
+          <div class="detail-section-title">📝 接口说明</div>
+          <div class="detail-desc-block" v-if="api.description" v-html="api.description"></div>
+          <div class="detail-empty" v-else>暂无说明</div>
+        </div>
+        <div class="detail-section-block">
+          <div class="detail-section-title">请求参数</div>
+          <table v-if="api.requestParams && api.requestParams.length" class="detail-table">
+            <thead>
+              <tr><th>参数名</th><th>必填</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="param in api.requestParams" :key="param.name">
+                <td>{{ param.name }}</td>
+                <td>{{ param.required ? '是' : '否' }}</td>
+                <td>{{ param.description }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="detail-empty" v-else>无参数</div>
+        </div>
+        <div class="detail-section-block">
+          <div class="detail-section-title">请求示例</div>
+          <pre class="detail-code" v-if="api.requestExample"><code>{{ api.requestExample }}</code></pre>
+          <div class="detail-empty" v-else>无</div>
+        </div>
+        <div class="detail-section-block">
+          <div class="detail-section-title">返回示例</div>
+          <pre class="detail-code" v-if="api.responseExample"><code>{{ api.responseExample }}</code></pre>
+          <div class="detail-empty" v-else>无</div>
+        </div>
+        <div class="detail-section-block">
+          <div class="detail-section-title">返回状态说明</div>
+          <table v-if="api.responseStatus && api.responseStatus.length" class="detail-table">
+            <thead>
+              <tr><th>字段名</th><th>必有</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="status in api.responseStatus" :key="status.name">
+                <td>{{ status.name }}</td>
+                <td>{{ status.required ? '是' : '否' }}</td>
+                <td>{{ status.description }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="detail-empty" v-else>无</div>
+        </div>
       </div>
-      <!-- 复制成功气泡提示，渐变背景+icon -->
-      <transition name="fade">
-        <div v-if="copyTip" class="copy-tip-modern">
-          <svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;margin-right:6px;"><circle cx="10" cy="10" r="10" fill="#36d1c4" opacity=".18"/><path d="M6 10.5l3 3l5-5" stroke="#36d1c4" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>
-          已复制到剪贴板
-        </div>
-      </transition>
-    </header>
-
-    <!-- 详情内容卡片 -->
-    <div class="api-detail-card modern-card">
-      <!-- 接口说明 -->
-      <section class="api-section">
-        <h2>接口说明</h2>
-        <div class="api-desc-block">
-          <span v-if="api.description" v-html="api.description"></span>
-          <span v-else class="api-empty">暂无说明</span>
-        </div>
-      </section>
-      <!-- 请求参数 -->
-      <section class="api-section">
-        <h2>请求参数</h2>
-        <table v-if="api.requestParams && api.requestParams.length" class="api-table modern-table">
-          <thead>
-            <tr>
-              <th>参数名</th>
-              <th>必填</th>
-              <th>说明</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="param in api.requestParams" :key="param.name">
-              <td>{{ param.name }}</td>
-              <td>{{ param.required ? '是' : '否' }}</td>
-              <td>{{ param.description }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div v-else class="api-empty">无参数</div>
-      </section>
-      <!-- 请求示例 -->
-      <section class="api-section">
-        <h2>请求示例</h2>
-        <pre class="api-code modern-code" v-if="api.requestExample">{{ api.requestExample }}</pre>
-        <div v-else class="api-empty">无</div>
-      </section>
-      <!-- 返回示例 -->
-      <section class="api-section">
-        <h2>返回示例</h2>
-        <pre class="api-code modern-code" v-if="api.responseExample">{{ api.responseExample }}</pre>
-        <div v-else class="api-empty">无</div>
-      </section>
-      <!-- 返回状态说明 -->
-      <section class="api-section">
-        <h2>返回状态说明</h2>
-        <table v-if="api.responseStatus && api.responseStatus.length" class="api-table modern-table">
-          <thead>
-            <tr>
-              <th>字段名</th>
-              <th>必有</th>
-              <th>说明</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="status in api.responseStatus" :key="status.name">
-              <td>{{ status.name }}</td>
-              <td>{{ status.required ? '是' : '否' }}</td>
-              <td>{{ status.description }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div v-else class="api-empty">无</div>
-      </section>
     </div>
+    <!-- 页脚 -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-text">
+          &copy; 2025 937bbAPI | <a href="mailto:hi@vvhan.com" class="footer-link">hi@vvhan.com</a>
+          <span class="footer-link">
+            <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2023000000号</a>
+          </span>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <script setup>
 import { useRoute } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
+import { $apiFetch } from '~/utils/apiFetch.js'
 const route = useRoute()
 const api = ref({})
 const apiBase = import.meta.env.VITE_API_BASE || ''
@@ -103,29 +97,27 @@ const fullApiUrl = computed(() => {
   if (api.value.url.startsWith('http')) return api.value.url
   return apiBase.replace(/\/$/, '') + api.value.url
 })
-// 复制功能
 const copyTip = ref(false)
 const copyActive = ref(false)
 function copyApiUrl() {
   if (!fullApiUrl.value) return
   navigator.clipboard.writeText(fullApiUrl.value)
+  copyActive.value = true
   copyTip.value = true
-  setTimeout(() => (copyTip.value = false), 1400)
+  setTimeout(() => {
+    copyTip.value = false
+    copyActive.value = false
+  }, 1400)
 }
-
-// 日期格式化
 function formatDate(date) {
   if (!date) return ''
   const d = new Date(date)
   return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
 }
-
 onMounted(async () => {
-  // TODO: 这里调用接口获取API详情，使用 route.params.id
-  // const res = await $fetch(`/api/apis/${route.params.id}`)
+  // TODO: 替换为真实接口
+  // const res = await $apiFetch(`/api/apis/${route.params.id}`)
   // api.value = res.data
-
-  // 示例数据，实际开发时请替换为接口返回的数据
   api.value = {
     id: '1',
     title: '二维码生成API',
@@ -151,235 +143,227 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* 现代高端卡片样式 */
-.modern-card {
-  box-shadow: 0 6px 32px 0 rgba(45,140,240,0.13), 0 1.5px 8px 0 rgba(54,209,196,0.08);
-  border-radius: 22px;
-  background: linear-gradient(90deg, #f8fbff 0%, #eaf6ff 100%);
-  border: none;
+.detail-bg {
+  background: linear-gradient(180deg, #f8fafc 0%, #eaf6ff 100%);
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
-.api-detail {
+.detail-main {
+  flex: 1 0 auto;
   max-width: 1200px;
-  margin: 40px auto 0 auto;
-  padding: 0 0 60px 0;
-  background: none;
+  margin: 0 auto;
+  padding: 0 16px 40px 16px;
+  display: flex;
+  flex-direction: column;
 }
-.detail-header {
-  border-bottom: none;
-  margin-bottom: 32px;
-  padding-bottom: 18px;
-  padding-top: 36px;
-  position: relative;
+.detail-hero {
+  width: 100%;
+  background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
+  color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(56,189,248,0.08);
+  margin: 32px 0 32px 0;
+  padding: 38px 0 18px 0;
 }
-.detail-header h1 {
-  font-size: 2.5rem;
-  color: #1a73e8;
-  margin-bottom: 8px;
+.detail-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0 36px;
+}
+.detail-hero-title {
+  font-size: 2.1rem;
   font-weight: 900;
-  letter-spacing: 1.2px;
-  text-shadow: 0 2px 8px rgba(26,115,232,0.08);
+  letter-spacing: 1.5px;
 }
-.api-summary {
-  color: #5a6d8a;
-  font-size: 1.18rem;
-  margin-bottom: 8px;
-  font-weight: 500;
+.detail-hero-summary {
+  font-size: 1.13rem;
+  opacity: 0.92;
+  margin-bottom: 2px;
 }
-.api-meta {
+.detail-hero-meta {
   display: flex;
+  gap: 18px;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 16px 24px;
-  font-size: 1.08rem;
-  color: #666;
-  margin-top: 8px;
-  align-items: center;
 }
-.api-method {
-  font-weight: 700;
-  padding: 2px 14px;
-  border-radius: 10px;
-  background: #e3eaf2;
-  color: #1a73e8;
-  margin-left: 8px;
-  box-shadow: 0 1px 4px 0 rgba(26,115,232,0.04);
-  letter-spacing: 1px;
-  font-size: 1.08rem;
-}
-.api-method.get {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-.api-method.post {
-  background: #fff7e6;
-  color: #faad14;
-}
-.api-url-full.copyable {
-  cursor: pointer;
-  color: #36d1c4;
-  background: linear-gradient(90deg, #e0f7fa 0%, #f0f7ff 100%);
-  border-radius: 10px;
-  padding: 4px 16px;
-  margin-left: 8px;
-  transition: background 0.18s, color 0.18s, transform 0.12s;
-  user-select: all;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  font-weight: 600;
-  box-shadow: 0 1.5px 8px 0 rgba(54,209,196,0.08);
-}
-.api-url-full.copyable:hover, .api-url-full.copyable.active {
-  background: linear-gradient(90deg, #36d1c4 0%, #1a73e8 100%);
-  color: #fff;
-  transform: scale(1.06);
-}
-.copy-icon {
-  margin-right: 7px;
-  color: #36d1c4;
-  transition: color 0.18s;
-}
-.api-url-full.copyable:hover .copy-icon, .api-url-full.copyable.active .copy-icon {
-  color: #fff;
-}
-.copy-btn-text {
-  margin-left: 10px;
-  font-size: 0.98rem;
-  background: #eaf6ff;
-  color: #1a73e8;
-  border-radius: 6px;
-  padding: 2px 10px;
-  transition: background 0.18s, color 0.18s;
-}
-.api-url-full.copyable:hover .copy-btn-text, .api-url-full.copyable.active .copy-btn-text {
-  background: #36d1c4;
-  color: #fff;
-}
-.copy-url-text {
-  max-width: 260px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.detail-method-badge {
   display: inline-block;
-  vertical-align: middle;
+  padding: 2px 14px;
+  border-radius: 999px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  background: #e0f2fe;
+  color: #0284c7;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-right: 8px;
 }
-.copy-tip-modern {
-  position: absolute;
-  right: 32px;
-  top: 18px;
-  background: linear-gradient(90deg, #36d1c4 0%, #1a73e8 100%);
-  color: #fff;
-  border-radius: 10px;
+.detail-method-badge.get { background: #dcfce7; color: #16a34a; }
+.detail-method-badge.post { background: #fee2e2; color: #b91c1c; }
+.detail-method-badge.put { background: #fef9c3; color: #b45309; }
+.detail-method-badge.delete { background: #fee2e2; color: #b91c1c; }
+.detail-hero-date {
+  color: #e0e7ef;
+  font-size: 1.02rem;
+}
+.detail-hero-count {
+  color: #bae6fd;
+  font-size: 1.02rem;
+}
+.detail-copy-btn {
+  background: linear-gradient(90deg, #bae6fd 0%, #f1f5f9 100%);
+  color: #0284c7;
+  border: none;
+  border-radius: 8px;
   padding: 7px 22px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 1px 4px 0 rgba(56,189,248,0.08);
+}
+.detail-copy-btn:hover {
+  background: #38bdf8;
+  color: #fff;
+}
+.detail-copy-tip {
+  color: #16a34a;
   font-size: 1.08rem;
-  z-index: 10;
-  box-shadow: 0 4px 18px 0 rgba(54,209,196,0.13);
+  margin-top: 12px;
+  text-align: right;
+}
+.detail-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.07);
+  border: 1.5px solid #e0e7ef;
+  padding: 38px 38px 28px 38px;
+  margin-bottom: 0;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.detail-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.detail-section-title {
+  font-size: 1.13rem;
+  color: #0284c7;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+  text-align: left;
   display: flex;
   align-items: center;
-  font-weight: 700;
-  animation: fadeInOut 1.4s;
+  gap: 6px;
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.4s;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(-10px); }
-  20% { opacity: 1; transform: translateY(0); }
-  80% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-10px); }
-}
-.api-detail-card {
-  background: #fff;
-  border-radius: 0 0 22px 22px;
-  box-shadow: 0 4px 32px 0 rgba(45,140,240,0.10);
-  padding: 38px 38px 38px 38px;
-}
-.api-section {
-  margin-bottom: 36px;
-}
-.api-section h2 {
-  font-size: 1.22rem;
-  color: #1a2940;
-  margin-bottom: 14px;
-  border-left: 5px solid #36d1c4;
-  padding-left: 12px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-.api-desc-block {
-  background: linear-gradient(90deg, #f8fbff 0%, #eaf6ff 100%);
+.detail-desc-block {
+  background: #f8fbff;
   border-radius: 10px;
-  padding: 18px 22px;
+  padding: 20px 26px;
   color: #333;
-  font-size: 1.12rem;
-  margin-bottom: 8px;
+  font-size: 1.13rem;
+  margin-bottom: 0;
   box-shadow: 0 1.5px 8px 0 rgba(45,140,240,0.04);
 }
-.modern-table {
+.detail-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   background: #fafcff;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 1.5px 8px 0 rgba(45,140,240,0.04);
 }
-.modern-table th, .modern-table td {
+.detail-table th, .detail-table td {
   border: 1px solid #e6e6e6;
-  padding: 10px 16px;
+  padding: 12px 18px;
   text-align: left;
-  font-size: 1.05rem;
+  font-size: 1.07rem;
 }
-.modern-table th {
+.detail-table th {
   background: #f0f7ff;
-  color: #2d8cf0;
+  color: #0284c7;
   font-weight: 700;
 }
-.modern-code {
-  background: linear-gradient(90deg, #f8f8f8 0%, #eaf6ff 100%);
+.detail-code {
+  background: #f8f8f8;
   border-radius: 8px;
-  padding: 14px;
-  font-size: 1.04rem;
-  color: #333;
+  padding: 16px;
+  font-size: 1.07rem;
+  color: #22223b;
   overflow-x: auto;
   box-shadow: 0 1.5px 8px 0 rgba(45,140,240,0.04);
+  margin-bottom: 0;
 }
-.api-empty {
+.detail-empty {
   color: #bbb;
-  font-size: 1rem;
+  font-size: 1.03rem;
   padding: 8px 0;
 }
+.footer {
+  width: 100%;
+  background: #f8fafc;
+  border-top: 1.5px solid #e0e7ef;
+  padding: 32px 0 18px 0;
+  margin-top: 32px;
+  flex-shrink: 0;
+}
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.footer-text {
+  color: #8b949e;
+  font-size: 15px;
+  text-align: center;
+}
+.footer-link {
+  color: #0284c7;
+  text-decoration: underline;
+  margin-left: 8px;
+}
+@media (max-width: 900px) {
+  .detail-main { max-width: 98vw; padding: 0 2vw 24px 2vw; }
+  .detail-hero-inner { max-width: 98vw; }
+  .detail-content { padding: 16px 4px 10px 4px; border-radius: 10px; }
+  .detail-hero-title { font-size: 1.15rem; }
+  .detail-hero-summary { font-size: 1rem; }
+  .detail-section-title { font-size: 1rem; }
+  .detail-desc-block { font-size: 1rem; padding: 12px 8px; }
+  .detail-table th, .detail-table td { font-size: 0.98rem; padding: 8px 6px; }
+  .detail-code { font-size: 0.98rem; padding: 8px; }
+  .footer-inner { max-width: 98vw; }
+}
 @media (max-width: 700px) {
-  .api-detail {
-    padding: 0 2vw 24px 2vw;
-    border-radius: 0;
+  .detail-main {
+    max-width: 100vw;
+    padding-left: 8px;
+    padding-right: 8px;
   }
-  .detail-header h1 {
-    font-size: 1.2rem;
-  }
-  .api-section h2 {
-    font-size: 1rem;
-    padding-left: 6px;
-  }
-  .modern-table th, .modern-table td {
-    font-size: 0.92rem;
-    padding: 6px 6px;
-  }
-  .modern-code {
-    font-size: 0.92rem;
-    padding: 8px;
-  }
-  .api-detail-card {
-    padding: 12px 4px 12px 4px;
-    border-radius: 0 0 14px 14px;
-  }
-  .copy-tip-modern {
-    right: 10px;
-    top: 10px;
-    font-size: 0.98rem;
-    padding: 5px 12px;
-  }
+  .detail-hero { padding: 18px 0 8px 0; margin: 16px 0 16px 0; }
+  .detail-hero-title { font-size: 1rem; }
+  .detail-hero-summary { font-size: 0.95rem; }
+  .detail-hero-meta { gap: 8px; font-size: 0.92rem; }
+  .detail-content { padding: 8px 2px 6px 2px; border-radius: 8px; gap: 16px; }
+  .detail-section-block { gap: 4px; }
+  .footer { padding: 14px 0 8px 0; margin-top: 18px; }
+  .footer-inner { padding: 0 4px; gap: 4px; }
+  .footer-text { font-size: 13px; }
 }
 </style>
