@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt build --mode production",
     "dev": "nuxt dev --mode development",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "generate": "nuxt generate --mode production",
+    "preview": "nuxt preview --mode production",
+    "postinstall": "nuxt prepare --mode production"
   },
   "dependencies": {
     "nuxt": "^3.17.5",
