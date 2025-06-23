@@ -14,6 +14,20 @@
           <button class="copy-btn" @click="copyKey">复制</button>
         </div>
       </div>
+      <!-- 新增：API Key 使用方式说明 -->
+      <div class="api-key-usage" style="width:100%;margin-bottom:18px;">
+        <b>API Key 使用方式：</b>
+        <div style="margin: 6px 0 0 0; font-size: 0.98rem;">
+          调用 API 时，请在请求头（headers）中添加 <code>x-api-key</code>，值为您的 API Key。
+          <br>
+          <b>示例：</b>
+          <pre style="background:#f8fafc;border-radius:6px;padding:8px 12px;margin:6px 0 0 0;">
+fetch('/api/xxx', {
+  headers: { 'x-api-key': '{{ user.key }}' }
+})
+          </pre>
+        </div>
+      </div>
       <NuxtLink v-if="user.isAdmin==1" to="/admin" class="admin-link">进入后台管理</NuxtLink>
       <div v-if="copyTip" class="copy-tip">已复制到剪贴板</div>
     </div>
@@ -56,5 +70,7 @@ onMounted(() => {
 .copy-btn { background: #e0e7ff; color: #6366f1; border: none; border-radius: 8px; padding: 6px 18px; font-size: 1.02rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .copy-btn:hover { background: #6366f1; color: #fff; }
 .copy-tip { color: #16a34a; font-size: 1.08rem; margin-top: 12px; text-align: center; }
+.api-key-usage { font-size: 0.95rem; color: #444; background: #f8fafc; border-radius: 6px; padding: 12px; margin-top: 12px; width: 100%; }
+.api-key-usage code { background: #e0f2fe; padding: 2px 6px; border-radius: 4px; }
 @media (max-width: 600px) { .user-center-main { padding: 18px 6vw 18px 6vw; min-width: 0; } }
 </style>

@@ -1,9 +1,8 @@
 // 封装通用请求方法，自动拼接 baseUrl，支持 get/post
-import { useRuntimeConfig } from '#imports'
+// 通过环境变量获取 baseUrl，兼容 Nuxt3/前端
+const baseUrl = import.meta.env.VITE_API_BASE || process.env.VITE_API_BASE || ''
 
 export async function $apiFetch(path, options = {}) {
-  const config = useRuntimeConfig()
-  const baseUrl = config.public.apiBase || ''
   // 支持 path 以 / 开头
   const url = path.startsWith('http') ? path : baseUrl + path
   // 默认 get

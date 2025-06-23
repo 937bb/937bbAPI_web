@@ -21,27 +21,35 @@
         <div class="form-group">
           <input v-model="form.password2" type="password" placeholder="重复密码" required minlength="6" maxlength="20" />
         </div>
-        <div v-if="errorMsg" class="form-error">{{ errorMsg }}</div>
         <div class="form-actions">
           <button type="submit" class="btn-main" :disabled="loading">{{ loading ? '注册中...' : '注册' }}</button>
           <NuxtLink to="/user/login" class="btn-link">已有账号？去登录</NuxtLink>
         </div>
       </form>
     </div>
+    <MessageModal v-model="messageModal.show" :message="messageModal.text" :type="messageModal.type" />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { $apiFetch } from '~/utils/apiFetch.js'
+import MessageModal from '~/components/MessageModal.vue'
+import { sendEmailCode, register } from '~/utils/api/index.js'
 const router = useRouter()
 const form = ref({ account: '', email: '', emailCode: '', password: '', password2: '' })
-const errorMsg = ref('')
 const loading = ref(false)
 const sendingCode = ref(false)
 const codeCountdown = ref(0)
+const messageModal = ref({ show: false, text: '', type: 'info' })
 let timer = null
+function showMessage(text, type = 'info', duration = 2000) {
+  messageModal.value = { show: false, text: '', type }
+  setTimeout(() => {
+    messageModal.value = { show: true, text, type }
+    setTimeout(() => { messageModal.value.show = false }, duration)
+  }, 10)
+}
 function validateEmail(email) {
   return /^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(email)
 }
@@ -55,67 +63,60 @@ function validateCode(code) {
   return /^\d{4,8}$/.test(code)
 }
 const sendCode = async () => {
-  if (!form.value.email) return errorMsg.value = '请填写邮箱'
-  if (!validateEmail(form.value.email)) return errorMsg.value = '邮箱格式不正确'
-  errorMsg.value = ''
+  if (!form.value.email) return showMessage('请填写邮箱', 'warn')
+  if (!validateEmail(form.value.email)) return showMessage('邮箱格式不正确', 'warn')
   sendingCode.value = true
   try {
-    await $apiFetch('http://192.168.0.101:3007/api/auth/sendEmailCode', {
-      method: 'POST',
-      body: { email: form.value.email }
-    })
+    await sendEmailCode(form.value.email)
     codeCountdown.value = 60
     timer = setInterval(() => {
       codeCountdown.value--
       if (codeCountdown.value <= 0) clearInterval(timer)
     }, 1000)
+    showMessage('验证码已发送', 'success')
   } catch (e) {
-    errorMsg.value = e.message || '验证码发送失败'
+    showMessage(e.message || '验证码发送失败', 'error')
   } finally {
     sendingCode.value = false
   }
 }
 const onRegister = async () => {
-  errorMsg.value = ''
   if (!validateAccount(form.value.account)) {
-    errorMsg.value = '账号需4-16位字母或数字'
+    showMessage('账号需4-16位字母或数字', 'warn')
     return
   }
   if (!validateEmail(form.value.email)) {
-    errorMsg.value = '邮箱格式不正确'
+    showMessage('邮箱格式不正确', 'warn')
     return
   }
   if (!validateCode(form.value.emailCode)) {
-    errorMsg.value = '验证码格式错误'
+    showMessage('验证码格式错误', 'warn')
     return
   }
   if (!validatePassword(form.value.password)) {
-    errorMsg.value = '密码需6-20位且包含字母和数字'
+    showMessage('密码需6-20位且包含字母和数字', 'warn')
     return
   }
   if (form.value.password !== form.value.password2) {
-    errorMsg.value = '两次输入的密码不一致'
+    showMessage('两次密码输入不一致', 'warn')
     return
   }
   loading.value = true
   try {
-    const res = await $apiFetch('http://192.168.0.101:3007/api/auth/register', {
-      method: 'POST',
-      body: {
-        account: form.value.account,
-        passwd: form.value.password,
-        email: form.value.email,
-        emailCode: form.value.emailCode
-      }
+    const res = await register({
+      account: form.value.account,
+      passwd: form.value.password,
+      email: form.value.email,
+      emailCode: form.value.emailCode
     })
     if (res.code === 200) {
-      alert('注册成功，请登录')
-      router.push('/user/login')
+      showMessage('注册成功', 'success')
+      setTimeout(() => router.push('/user/login'), 800)
     } else {
-      errorMsg.value = res.msg || '注册失败'
+      showMessage(res.msg || '注册失败', 'error')
     }
   } catch (e) {
-    errorMsg.value = e.message || '注册失败'
+    showMessage(e.message || '注册失败', 'error')
   } finally {
     loading.value = false
   }
@@ -130,7 +131,6 @@ const onRegister = async () => {
 .form-group input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1.5px solid #e0e7ef; font-size: 1.08rem; outline: none; transition: border 0.2s; }
 .form-group input:focus { border-color: #6366f1; }
 .form-group-code { display: flex; gap: 10px; align-items: center; }
-.form-error { color: #b91c1c; font-size: 1.02rem; margin-bottom: 10px; text-align: left; width: 100%; }
 .btn-code { background: #e0e7ff; color: #6366f1; border: none; border-radius: 8px; padding: 10px 18px; font-size: 1.02rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-code:disabled { background: #f1f5f9; color: #bbb; cursor: not-allowed; }
 .form-actions { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 18px; }

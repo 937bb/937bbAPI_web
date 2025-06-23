@@ -7,8 +7,14 @@
           <div class="detail-hero-title">{{ api.title }}</div>
           <div class="detail-hero-summary">{{ api.summary }}</div>
           <div class="detail-hero-meta">
-            <span class="detail-method-badge" :class="api.method && api.method.toLowerCase()">{{ api.method }}</span>
-            <span class="detail-hero-date">创建于 {{ formatDate(api.createTime) }}</span>
+            <span
+              class="detail-method-badge"
+              :class="api.method && api.method.toLowerCase()"
+              >{{ api.method }}</span
+            >
+            <span class="detail-hero-date"
+              >创建于 {{ formatDate(api.createTime) }}</span
+            >
             <span class="detail-hero-count">{{ api.requestCount }} 次调用</span>
             <button class="detail-copy-btn" @click="copyApiUrl">
               <span v-if="copyActive">已复制</span>
@@ -24,19 +30,30 @@
       <div class="detail-content">
         <div class="detail-section-block">
           <div class="detail-section-title">📝 接口说明</div>
-          <div class="detail-desc-block" v-if="api.description" v-html="api.description"></div>
+          <div
+            class="detail-desc-block"
+            v-if="api.description"
+            v-html="api.description"
+          ></div>
           <div class="detail-empty" v-else>暂无说明</div>
         </div>
         <div class="detail-section-block">
           <div class="detail-section-title">请求参数</div>
-          <table v-if="api.requestParams && api.requestParams.length" class="detail-table">
+          <table
+            v-if="api.requestParams && api.requestParams.length"
+            class="detail-table"
+          >
             <thead>
-              <tr><th>参数名</th><th>必填</th><th>说明</th></tr>
+              <tr>
+                <th>参数名</th>
+                <th>必填</th>
+                <th>说明</th>
+              </tr>
             </thead>
             <tbody>
               <tr v-for="param in api.requestParams" :key="param.name">
                 <td>{{ param.name }}</td>
-                <td>{{ param.required ? '是' : '否' }}</td>
+                <td>{{ param.required ? "是" : "否" }}</td>
                 <td>{{ param.description }}</td>
               </tr>
             </tbody>
@@ -45,25 +62,50 @@
         </div>
         <div class="detail-section-block">
           <div class="detail-section-title">请求示例</div>
-          <pre class="detail-code" v-if="api.requestExample"><code>{{ api.requestExample }}</code></pre>
+          <pre
+            class="detail-code"
+            v-if="api.requestExample"
+          ><code>{{ api.requestExample }}</code></pre>
           <div class="detail-empty" v-else>无</div>
         </div>
         <div class="detail-section-block">
           <div class="detail-section-title">返回示例</div>
-          <pre class="detail-code" v-if="api.responseExample"><code>{{ api.responseExample }}</code></pre>
+          <pre
+            class="detail-code"
+            v-if="formattedResponseExample"
+          ><code>{{ formattedResponseExample }}</code></pre>
           <div class="detail-empty" v-else>无</div>
         </div>
-        <div class="detail-section-block">
+        <!-- <div class="detail-section-block">
           <div class="detail-section-title">返回状态说明</div>
-          <table v-if="api.responseStatus && api.responseStatus.length" class="detail-table">
+          <pre class="detail-code" v-if="formattedResponseStatus"><code>{{ formattedResponseStatus }}</code></pre>
+          <div class="detail-empty" v-else>无</div>
+        </div> -->
+        <div class="detail-section-block">
+          <div class="detail-section-title">返回数据描述</div>
+          <table
+            v-if="
+              Array.isArray(api.responseStatus) && api.responseStatus.length
+            "
+            class="detail-table"
+          >
             <thead>
-              <tr><th>字段名</th><th>必有</th><th>说明</th></tr>
+              <tr>
+                <th>字段名</th>
+                <th>类型</th>
+                <th>含义</th>
+                <th>说明</th>
+              </tr>
             </thead>
             <tbody>
-              <tr v-for="status in api.responseStatus" :key="status.name">
-                <td>{{ status.name }}</td>
-                <td>{{ status.required ? '是' : '否' }}</td>
-                <td>{{ status.description }}</td>
+              <tr
+                v-for="field in api.responseStatus"
+                :key="field.name + field.meaning"
+              >
+                <td>{{ field.name }}</td>
+                <td>{{ field.type }}</td>
+                <td>{{ field.meaning }}</td>
+                <td>{{ field.description }}</td>
               </tr>
             </tbody>
           </table>
@@ -75,9 +117,12 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-text">
-          &copy; 2025 937bbAPI | <a href="mailto:hi@vvhan.com" class="footer-link">hi@vvhan.com</a>
+          &copy; 2025 937bbAPI |
+          <a href="mailto:hi@vvhan.com" class="footer-link">hi@vvhan.com</a>
           <span class="footer-link">
-            <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2023000000号</a>
+            <a href="https://beian.miit.gov.cn/" target="_blank"
+              >粤ICP备2023000000号</a
+            >
           </span>
         </div>
       </div>
@@ -86,64 +131,71 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
-import { ref, onMounted, computed } from 'vue'
-import { $apiFetch } from '~/utils/apiFetch.js'
-const route = useRoute()
-const api = ref({})
-const apiBase = import.meta.env.VITE_API_BASE || ''
+import { useRoute } from "vue-router";
+import { ref, onMounted, computed } from "vue";
+import { getApiDetail } from "~/utils/api/index.js";
+const route = useRoute();
+const api = ref({});
+const apiBase = import.meta.env.VITE_API_BASE || "";
 const fullApiUrl = computed(() => {
-  if (!api.value.url) return ''
-  if (api.value.url.startsWith('http')) return api.value.url
-  return apiBase.replace(/\/$/, '') + api.value.url
-})
-const copyTip = ref(false)
-const copyActive = ref(false)
+  if (!api.value.url) return "";
+  if (api.value.url.startsWith("http")) return api.value.url;
+  return apiBase.replace(/\/$/, "") + api.value.url;
+});
+const copyTip = ref(false);
+const copyActive = ref(false);
 function copyApiUrl() {
-  if (!fullApiUrl.value) return
-  navigator.clipboard.writeText(fullApiUrl.value)
-  copyActive.value = true
-  copyTip.value = true
+  if (!fullApiUrl.value) return;
+  navigator.clipboard.writeText(fullApiUrl.value);
+  copyActive.value = true;
+  copyTip.value = true;
   setTimeout(() => {
-    copyTip.value = false
-    copyActive.value = false
-  }, 1400)
+    copyTip.value = false;
+    copyActive.value = false;
+  }, 1400);
 }
 function formatDate(date) {
-  if (!date) return ''
-  const d = new Date(date)
-  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
+  if (!date) return "";
+  const d = new Date(date);
+  return d.toLocaleDateString() + " " + d.toLocaleTimeString();
 }
-onMounted(async () => {
-  // TODO: 替换为真实接口
-  // const res = await $apiFetch(`/api/apis/${route.params.id}`)
-  // api.value = res.data
-  api.value = {
-    id: '1',
-    title: '二维码生成API',
-    summary: '快速生成二维码图片',
-    url: '/api/qr',
-    method: 'GET',
-    requestExample: 'GET /api/qr?text=HelloWorld',
-    responseExample: '{\n  "code": 200,\n  "msg": "success",\n  "imgUrl": "https://..."\n}',
-    requestParams: [
-      { name: 'text', required: true, description: '需要生成二维码的内容' }
-    ],
-    responseStatus: [
-      { name: 'code', required: true, description: '状态码' },
-      { name: 'msg', required: true, description: '提示信息' },
-      { name: 'imgUrl', required: true, description: '二维码图片地址' }
-    ],
-    description: '通过本 API 可以快速生成二维码图片，支持自定义内容。',
-    createTime: '2025-06-20T10:00:00',
-    updateTime: '2025-06-21T10:00:00',
-    requestCount: 1234
+const formattedResponseExample = computed(() => {
+  if (!api.value.responseExample) return "";
+  // 只尝试格式化合法JSON，否则原样返回
+  try {
+    return JSON.stringify(JSON.parse(api.value.responseExample), null, 2);
+  } catch {
+    return api.value.responseExample;
   }
-})
+});
+const formattedResponseStatus = computed(() => {
+  if (!api.value.responseStatus) return "";
+  if (typeof api.value.responseStatus === "string") {
+    try {
+      return JSON.stringify(JSON.parse(api.value.responseStatus), null, 2);
+    } catch {
+      return api.value.responseStatus;
+    }
+  }
+  try {
+    return JSON.stringify(api.value.responseStatus, null, 2);
+  } catch {
+    return String(api.value.responseStatus);
+  }
+});
+onMounted(async () => {
+  try {
+    const res = await getApiDetail(route.params.id);
+    api.value = res.data || {};
+  } catch {
+    api.value = {};
+  }
+});
 </script>
 
 <style scoped>
 .detail-bg {
+  padding: 70px 0;
   background: linear-gradient(180deg, #f8fafc 0%, #eaf6ff 100%);
   min-height: 100vh;
   width: 100%;
@@ -163,7 +215,7 @@ onMounted(async () => {
   background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
   color: #fff;
   border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(56,189,248,0.08);
+  box-shadow: 0 4px 24px 0 rgba(56, 189, 248, 0.08);
   margin: 32px 0 32px 0;
   padding: 38px 0 18px 0;
 }
@@ -204,10 +256,22 @@ onMounted(async () => {
   text-transform: uppercase;
   margin-right: 8px;
 }
-.detail-method-badge.get { background: #dcfce7; color: #16a34a; }
-.detail-method-badge.post { background: #fee2e2; color: #b91c1c; }
-.detail-method-badge.put { background: #fef9c3; color: #b45309; }
-.detail-method-badge.delete { background: #fee2e2; color: #b91c1c; }
+.detail-method-badge.get {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.detail-method-badge.post {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.detail-method-badge.put {
+  background: #fef9c3;
+  color: #b45309;
+}
+.detail-method-badge.delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
 .detail-hero-date {
   color: #e0e7ef;
   font-size: 1.02rem;
@@ -226,7 +290,7 @@ onMounted(async () => {
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s, color 0.2s;
-  box-shadow: 0 1px 4px 0 rgba(56,189,248,0.08);
+  box-shadow: 0 1px 4px 0 rgba(56, 189, 248, 0.08);
 }
 .detail-copy-btn:hover {
   background: #38bdf8;
@@ -241,7 +305,7 @@ onMounted(async () => {
 .detail-content {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.07);
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.07);
   border: 1.5px solid #e0e7ef;
   padding: 38px 38px 28px 38px;
   margin-bottom: 0;
@@ -273,7 +337,7 @@ onMounted(async () => {
   color: #333;
   font-size: 1.13rem;
   margin-bottom: 0;
-  box-shadow: 0 1.5px 8px 0 rgba(45,140,240,0.04);
+  box-shadow: 0 1.5px 8px 0 rgba(45, 140, 240, 0.04);
 }
 .detail-table {
   width: 100%;
@@ -283,9 +347,10 @@ onMounted(async () => {
   background: #fafcff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 1.5px 8px 0 rgba(45,140,240,0.04);
+  box-shadow: 0 1.5px 8px 0 rgba(45, 140, 240, 0.04);
 }
-.detail-table th, .detail-table td {
+.detail-table th,
+.detail-table td {
   border: 1px solid #e6e6e6;
   padding: 12px 18px;
   text-align: left;
@@ -303,7 +368,7 @@ onMounted(async () => {
   font-size: 1.07rem;
   color: #22223b;
   overflow-x: auto;
-  box-shadow: 0 1.5px 8px 0 rgba(45,140,240,0.04);
+  box-shadow: 0 1.5px 8px 0 rgba(45, 140, 240, 0.04);
   margin-bottom: 0;
 }
 .detail-empty {
@@ -339,16 +404,42 @@ onMounted(async () => {
   margin-left: 8px;
 }
 @media (max-width: 900px) {
-  .detail-main { max-width: 98vw; padding: 0 2vw 24px 2vw; }
-  .detail-hero-inner { max-width: 98vw; }
-  .detail-content { padding: 16px 4px 10px 4px; border-radius: 10px; }
-  .detail-hero-title { font-size: 1.15rem; }
-  .detail-hero-summary { font-size: 1rem; }
-  .detail-section-title { font-size: 1rem; }
-  .detail-desc-block { font-size: 1rem; padding: 12px 8px; }
-  .detail-table th, .detail-table td { font-size: 0.98rem; padding: 8px 6px; }
-  .detail-code { font-size: 0.98rem; padding: 8px; }
-  .footer-inner { max-width: 98vw; }
+  .detail-main {
+    max-width: 98vw;
+    padding: 0 2vw 24px 2vw;
+  }
+  .detail-hero-inner {
+    max-width: 98vw;
+  }
+  .detail-content {
+    padding: 16px 4px 10px 4px;
+    border-radius: 10px;
+  }
+  .detail-hero-title {
+    font-size: 1.15rem;
+  }
+  .detail-hero-summary {
+    font-size: 1rem;
+  }
+  .detail-section-title {
+    font-size: 1rem;
+  }
+  .detail-desc-block {
+    font-size: 1rem;
+    padding: 12px 8px;
+  }
+  .detail-table th,
+  .detail-table td {
+    font-size: 0.98rem;
+    padding: 8px 6px;
+  }
+  .detail-code {
+    font-size: 0.98rem;
+    padding: 8px;
+  }
+  .footer-inner {
+    max-width: 98vw;
+  }
 }
 @media (max-width: 700px) {
   .detail-main {
@@ -356,14 +447,38 @@ onMounted(async () => {
     padding-left: 8px;
     padding-right: 8px;
   }
-  .detail-hero { padding: 18px 0 8px 0; margin: 16px 0 16px 0; }
-  .detail-hero-title { font-size: 1rem; }
-  .detail-hero-summary { font-size: 0.95rem; }
-  .detail-hero-meta { gap: 8px; font-size: 0.92rem; }
-  .detail-content { padding: 8px 2px 6px 2px; border-radius: 8px; gap: 16px; }
-  .detail-section-block { gap: 4px; }
-  .footer { padding: 14px 0 8px 0; margin-top: 18px; }
-  .footer-inner { padding: 0 4px; gap: 4px; }
-  .footer-text { font-size: 13px; }
+  .detail-hero {
+    padding: 18px 0 8px 0;
+    margin: 16px 0 16px 0;
+  }
+  .detail-hero-title {
+    font-size: 1rem;
+  }
+  .detail-hero-summary {
+    font-size: 0.95rem;
+  }
+  .detail-hero-meta {
+    gap: 8px;
+    font-size: 0.92rem;
+  }
+  .detail-content {
+    padding: 8px 2px 6px 2px;
+    border-radius: 8px;
+    gap: 16px;
+  }
+  .detail-section-block {
+    gap: 4px;
+  }
+  .footer {
+    padding: 14px 0 8px 0;
+    margin-top: 18px;
+  }
+  .footer-inner {
+    padding: 0 4px;
+    gap: 4px;
+  }
+  .footer-text {
+    font-size: 13px;
+  }
 }
 </style>

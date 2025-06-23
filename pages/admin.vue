@@ -33,8 +33,8 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 const siderCollapsed = ref(false)
 const route = useRoute()
-const isUserPage = computed(() => route.path.includes('/admin/user-list'))
-const isApiPage = computed(() => route.path.includes('/admin/api-list'))
+const isUserPage = computed(() => route.path.startsWith('/admin/users'))
+const isApiPage = computed(() => route.path.startsWith('/admin/api'))
 </script>
 
 <style scoped>

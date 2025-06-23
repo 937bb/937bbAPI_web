@@ -1,5 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-[#f8fafc]">
+    
+
     <!-- 主要内容区域 -->
     <main class="flex-1 max-w-7xl mx-auto px-2 py-10 w-full">
       <NuxtPage />
@@ -19,18 +21,31 @@
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted } from "vue";
+const siteName = ref(import.meta.env.VITE_SITE_NAME || "WebAPI接口");
+const icp = ref(import.meta.env.VITE_ICP || "");
+const icpUrl = ref("https://beian.miit.gov.cn/");
+const user = ref(null);
+onMounted(() => {
+  const u = localStorage.getItem("user");
+  if (u) user.value = JSON.parse(u);
+});
+</script>
+
 <style>
 :root {
   --primary-color: #3b82f6;
   --primary-color-dark: #2563eb;
   --primary-color-light: #60a5fa;
   --background-color: #f8fafc;
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 body {
   background-color: var(--background-color);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
 }
 
@@ -45,7 +60,8 @@ body {
 
 .modern-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .status-badge {
@@ -124,7 +140,7 @@ body {
   background-color: #f8fafc;
   border-radius: 0.5rem;
   padding: 1rem;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   overflow-x: auto;
 }
 
@@ -145,20 +161,67 @@ body {
   text-align: left;
 }
 
+.global-nav {
+  width: 100%;
+  background: none;
+  /* border-bottom: 1.5px solid #e5e7eb; */
+  box-shadow: 0 2px 8px 0 rgba(45, 140, 240, 0.04);
+  position: fixed;
+  top: 0;
+  z-index: 100;
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2vw;
+  height: 60px;
+}
+.nav-logo {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #6366f1;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.nav-link {
+  color: #fff;
+  font-size: 1.07rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 6px 18px;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.nav-link:hover,
+.nav-link.nuxt-link-exact-active {
+  background: #e0e7ff;
+  color: #3b82f6;
+}
 @media (max-width: 900px) {
   main {
     max-width: 100vw;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
-  .max-w-7xl, .modern-card, .footer-inner {
+  .max-w-7xl,
+  .modern-card,
+  .footer-inner {
     max-width: 98vw !important;
   }
   .code-block {
     padding: 0.5rem;
     font-size: 0.95rem;
   }
-  .table th, .table td {
+  .table th,
+  .table td {
     padding: 0.5rem;
     font-size: 0.95rem;
   }
@@ -174,14 +237,16 @@ body {
     padding: 0.7rem;
     border-radius: 0.6rem;
   }
-  .footer-inner, .max-w-7xl {
+  .footer-inner,
+  .max-w-7xl {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }
   .code-block {
     font-size: 0.9rem;
   }
-  .table th, .table td {
+  .table th,
+  .table td {
     font-size: 0.9rem;
     padding: 0.3rem;
   }
@@ -190,10 +255,3 @@ body {
   }
 }
 </style>
-
-<script setup>
-import { ref } from 'vue'
-const siteName = ref('韩小韩WebAPI接口')
-const icp = ref('')
-const icpUrl = ref('https://beian.miit.gov.cn/')
-</script>

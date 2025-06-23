@@ -19,7 +19,7 @@
           <td>{{ user.nickname }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.role==='admin'?'管理员':'普通用户' }}</td>
-          <td>{{ user.status==='active'?'正常':'禁用' }}</td>
+          <td>{{ user.status===0?'正常':'禁用' }}</td>
           <td>
             <NuxtLink :to="`/admin/users/${user.id}`" class="edit-btn">编辑</NuxtLink>
             <button class="edit-btn delete" @click="openDeleteDialog(user)">删除</button>
@@ -64,7 +64,6 @@
             <button type="submit" class="edit-btn">保存</button>
             <button type="button" class="edit-btn cancel" @click="closeAddDialog">取消</button>
           </div>
-          <div v-if="addError" class="modal-error">{{ addError }}</div>
         </form>
       </div>
     </div>
@@ -79,35 +78,77 @@
         </div>
       </div>
     </div>
+
+    <MessageModal v-model="messageModal.show" :message="messageModal.text" :type="messageModal.type" />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import MessageModal from '~/components/MessageModal.vue'
 import { useRouter } from 'vue-router'
+import { getUserList } from '~/utils/api/index.js'
+
 const router = useRouter()
-const users = ref([
-  {id:'1',username:'admin',nickname:'超级管理员',email:'admin@test.com',role:'admin',status:'active'},
-  {id:'2',username:'user1',nickname:'普通用户',email:'user1@test.com',role:'user',status:'active'}
-])
+const users = ref([])
 const showAddDialog = ref(false)
 const addForm = ref({username:'',nickname:'',email:'',role:'user',status:'active'})
-const addError = ref('')
-function submitAdd() {
-  if (!addForm.value.username.trim()) { addError.value = '用户名不能为空'; return }
-  if (addForm.value.email && !/^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(addForm.value.email)) { addError.value = '邮箱格式不正确'; return }
-  if (users.value.some(u=>u.username===addForm.value.username)) { addError.value = '用户名已存在'; return }
-  users.value.push({
-    ...addForm.value,
-    id: Date.now().toString()
-  })
-  showAddDialog.value = false
-  addError.value = ''
-  addForm.value = {username:'',nickname:'',email:'',role:'user',status:'active'}
+const messageModal = ref({ show: false, text: '', type: 'info' })
+
+function showMessage(text, type = 'info', duration = 2000) {
+  messageModal.value = { show: false, text: '', type }
+  setTimeout(() => {
+    messageModal.value = { show: true, text, type }
+    setTimeout(() => { messageModal.value.show = false }, duration)
+  }, 10)
+}
+
+async function fetchUsers() {
+  // 获取本地 token
+  const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
+  const token = user?.token || ''
+  try {
+    const res = await getUserList(token)
+    if (res.code === 200 && Array.isArray(res.data)) {
+      users.value = res.data.map(u => ({
+        id: u.id,
+        username: u.account,
+        nickname: u.account, // 后端无昵称字段，默认用账号
+        email: u.email,
+        role: u.isAdmin === 1 ? 'admin' : 'user',
+        status: u.status
+      }))
+    } else {
+      users.value = []
+    }
+  } catch (e) {
+    users.value = []
+  }
+}
+
+fetchUsers()
+
+async function submitAdd() {
+  if (!addForm.value.username.trim()) {
+    showMessage('用户名不能为空', 'warn'); return
+  }
+  if (addForm.value.email && !/^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(addForm.value.email)) { showMessage('邮箱格式不正确', 'warn'); return }
+  if (users.value.some(u=>u.username===addForm.value.username)) { showMessage('用户名已存在', 'warn'); return }
+  try {
+    // 这里调用实际的添加用户接口
+    users.value.push({
+      ...addForm.value,
+      id: Date.now().toString()
+    })
+    showMessage('添加成功', 'success')
+    closeAddDialog()
+    fetchUsers()
+  } catch (e) {
+    showMessage(e.message || '添加失败', 'error')
+  }
 }
 function closeAddDialog() {
   showAddDialog.value = false
-  addError.value = ''
 }
 // 删除逻辑
 const deleteDialogVisible = ref(false)
@@ -120,9 +161,16 @@ function closeDeleteDialog() {
   deleteDialogVisible.value = false
   deleteTarget.value = null
 }
-function doDelete() {
-  if (deleteTarget.value) {
-    users.value = users.value.filter(u=>u.id!==deleteTarget.value.id)
+async function doDelete() {
+  try {
+    // 这里调用实际的删除用户接口
+    if (deleteTarget.value) {
+      users.value = users.value.filter(u=>u.id!==deleteTarget.value.id)
+    }
+    showMessage('删除成功', 'success')
+    fetchUsers()
+  } catch (e) {
+    showMessage(e.message || '删除失败', 'error')
   }
   closeDeleteDialog()
 }
@@ -148,6 +196,5 @@ function doDelete() {
 .modal-form-item label { font-size: 1.01rem; color: #555; }
 .modal-form-item input, .modal-form-item select { padding: 7px 12px; border-radius: 7px; border: 1.5px solid #e0e7ef; font-size: 1.05rem; color: #6366f1; background: #f8fafc; }
 .modal-form-actions { display: flex; gap: 18px; justify-content: flex-end; margin-top: 12px; }
-.modal-error { color: #ef4444; font-size: 0.98rem; margin-top: 8px; text-align: right; }
 .modal-content { font-size: 1.05rem; color: #444; margin-bottom: 18px; }
 </style>
