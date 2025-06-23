@@ -46,6 +46,7 @@
             <thead>
               <tr>
                 <th>参数名</th>
+                <th>类型</th>
                 <th>必填</th>
                 <th>说明</th>
               </tr>
@@ -53,6 +54,7 @@
             <tbody>
               <tr v-for="param in api.requestParams" :key="param.name">
                 <td>{{ param.name }}</td>
+                <td>{{ param.type || '-' }}</td>
                 <td>{{ param.required ? "是" : "否" }}</td>
                 <td>{{ param.description }}</td>
               </tr>
@@ -113,20 +115,6 @@
         </div>
       </div>
     </div>
-    <!-- 页脚 -->
-    <footer class="footer">
-      <div class="footer-inner">
-        <div class="footer-text">
-          &copy; 2025 937bbAPI |
-          <a href="mailto:hi@vvhan.com" class="footer-link">hi@vvhan.com</a>
-          <span class="footer-link">
-            <a href="https://beian.miit.gov.cn/" target="_blank"
-              >粤ICP备2023000000号</a
-            >
-          </span>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
