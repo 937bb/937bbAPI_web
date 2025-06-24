@@ -1,107 +1,230 @@
 <template>
-  <div>
-    <div class="admin-section-title">API接口管理</div>
-    <div class="admin-filter-bar">
-      <select v-model="methodFilter" class="admin-filter-select">
-        <option value="">全部方法</option>
-        <option v-for="m in methodOptions" :key="m" :value="m">{{ m }}</option>
-      </select>
-      <select v-model="groupFilter" class="admin-filter-select">
-        <option value="">全部分组</option>
-        <option v-for="g in groupOptions" :key="g.id" :value="g.id">
-          {{ g.title }}
-        </option>
-      </select>
-      <button class="group-manage-btn" @click="showGroupManage = true">
-        分组管理
-      </button>
+  <div class="py-6">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900">API 接口管理</h2>
+        <p class="mt-1 text-sm text-gray-500">管理系统中的所有API接口</p>
+      </div>
+      <div class="mt-4 md:mt-0">
+        <button
+          @click="showGroupManage = true"
+          class="mr-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          分组管理
+        </button>
+        <button
+          @click="goAddApi"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          新增API
+        </button>
+      </div>
     </div>
-    <button class="add-btn" @click="goAddApi">新增API</button>
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>名称</th>
-          <th>路径</th>
-          <th>方法</th>
-          <th>分组</th>
-          <th>请求次数</th>
-          <th>创建时间</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="api in filteredApis" :key="api.id">
-          <td>{{ api.title }}</td>
-          <td class="mono">{{ api.url }}</td>
-          <td>{{ api.method }}</td>
-          <td>{{ getGroupTitle(api.groupId) }}</td>
-          <td>{{ api.requestCount }}</td>
-          <td>{{ formatDate(api.createTime) }}</td>
-          <td>
-            <NuxtLink :to="`/admin/api/${api.id}`" class="edit-btn"
-              >编辑</NuxtLink
-            >
-            <button class="edit-btn delete" @click="openDeleteDialog(api)">
-              删除
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div v-if="filteredApis.length === 0" class="admin-empty">暂无API</div>
+
+    <!-- Filters -->
+    <div class="bg-white shadow rounded-xl p-4 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
+        <div class="w-full sm:w-48">
+          <label for="method-filter" class="block text-sm font-medium text-gray-700 mb-1">请求方法</label>
+          <select
+            id="method-filter"
+            v-model="methodFilter"
+            class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="">全部方法</option>
+            <option v-for="m in methodOptions" :key="m" :value="m">{{ m }}</option>
+          </select>
+        </div>
+        <div class="w-full sm:w-48">
+          <label for="group-filter" class="block text-sm font-medium text-gray-700 mb-1">分组</label>
+          <select
+            id="group-filter"
+            v-model="groupFilter"
+            class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="">全部分组</option>
+            <option v-for="g in groupOptions" :key="g.id" :value="g.id">
+              {{ g.title }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- API List -->
+    <div class="bg-white shadow rounded-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名称</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">路径</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">方法</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分组</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">请求次数</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="api in filteredApis" :key="api.id" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">{{ api.title }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-mono text-gray-500">{{ api.url }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span 
+                  :class="{
+                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full': true,
+                    'bg-green-100 text-green-800': api.method === 'GET',
+                    'bg-blue-100 text-blue-800': api.method === 'POST',
+                    'bg-yellow-100 text-yellow-800': api.method === 'PUT' || api.method === 'PATCH',
+                    'bg-red-100 text-red-800': api.method === 'DELETE'
+                  }"
+                >
+                  {{ api.method }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ getGroupTitle(api.groupId) }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ api.requestCount || 0 }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(api.createTime) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <NuxtLink :to="`/admin/api/${api.id}`" class="text-blue-600 hover:text-blue-900 mr-4">编辑</NuxtLink>
+                <button @click="openDeleteDialog(api)" class="text-red-600 hover:text-red-900">删除</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-if="filteredApis.length === 0" class="text-center py-8 text-gray-500">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <p class="mt-2 text-sm font-medium text-gray-700">暂无API数据</p>
+        <p class="mt-1 text-sm text-gray-500">点击右上角"新增API"按钮添加</p>
+      </div>
+    </div>
 
     <!-- 删除确认弹窗 -->
-    <div v-if="deleteDialogVisible" class="modal-mask">
-      <div class="modal-dialog">
-        <div class="modal-title">确认删除</div>
-        <div class="modal-content">
-          确定要删除 API <b>{{ deleteTarget?.title }}</b> 吗？此操作不可撤销。
-        </div>
-        <div class="modal-form-actions">
-          <button class="edit-btn delete" @click="doDelete">删除</button>
-          <button class="edit-btn cancel" @click="closeDeleteDialog">
-            取消
-          </button>
+    <div v-if="deleteDialogVisible" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="closeDeleteDialog"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                  确认删除
+                </h3>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-500">
+                    确定要删除 API <span class="font-medium">{{ deleteTarget?.title }}</span> 吗？此操作不可撤销。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button type="button" @click="doDelete" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+              删除
+            </button>
+            <button type="button" @click="closeDeleteDialog" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              取消
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 分组管理弹窗 -->
-    <div v-if="showGroupManage" class="modal-mask">
-      <div class="modal-dialog" style="min-width: 340px; max-width: 96vw">
-        <div class="modal-title">分组管理</div>
-        <div class="modal-form-item">
-          <label>新增分组</label>
-          <div style="display: flex; gap: 10px; align-items: center">
-            <input
-              v-model="newGroupName"
-              maxlength="16"
-              placeholder="分组名"
-              style="flex: 1"
-            />
-            <button class="edit-btn" @click="addGroupHandler">添加</button>
+    <div v-if="showGroupManage" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="closeGroupManage"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+            <div class="sm:flex sm:items-start">
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                  分组管理
+                </h3>
+                <div class="mt-4">
+                  <div class="mb-6">
+                    <label for="new-group" class="block text-sm font-medium text-gray-700 mb-1">新增分组</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                      <input
+                        type="text"
+                        id="new-group"
+                        v-model="newGroupName"
+                        maxlength="16"
+                        class="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                        placeholder="输入分组名称"
+                      />
+                      <button
+                        type="button"
+                        @click="addGroupHandler"
+                        class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        添加
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">已有分组</label>
+                    <div class="bg-gray-50 rounded-md -space-y-px">
+                      <div v-for="(g, idx) in groupOptions" :key="g.id" class="relative border border-gray-200 rounded-md px-3 py-2 flex justify-between items-center hover:bg-gray-100 focus:outline-none">
+                        <input
+                          v-model="g.title"
+                          maxlength="16"
+                          class="bg-transparent border-0 p-0 focus:ring-0 focus:outline-none block w-full sm:text-sm"
+                          :disabled="true"
+                        />
+                        <button
+                          @click="() => removeGroupHandler(idx)"
+                          class="text-red-600 hover:text-red-800"
+                        >
+                          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <p v-if="groupError" class="mt-2 text-sm text-red-600">{{ groupError }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="modal-form-item">
-          <label>已有分组</label>
-          <div v-for="(g, idx) in groupOptions" :key="g.id" class="group-row">
-            <input
-              v-model="g.title"
-              maxlength="16"
-              style="width: 120px"
-              disabled
-            />
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button
-              class="edit-btn delete"
-              @click="() => removeGroupHandler(idx)"
+              type="button"
+              @click="closeGroupManage"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
             >
-              删除
+              完成
             </button>
           </div>
-          <div v-if="groupError" class="modal-error">{{ groupError }}</div>
-        </div>
-        <div class="modal-form-actions">
-          <button class="edit-btn" @click="closeGroupManage">完成</button>
         </div>
       </div>
     </div>
@@ -286,178 +409,93 @@ function closeGroupManage() {
 }
 </script>
 
+<!-- Remove all custom styles as we're using Tailwind CSS -->
 <style scoped>
-.admin-section-title {
-  font-size: 1.15rem;
-  font-weight: bold;
-  color: #6366f1;
-  margin-bottom: 18px;
-}
-.add-btn {
-  background: linear-gradient(90deg, #6366f1, #60a5fa);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 22px;
-  font-size: 1.05rem;
+/* Custom styles can be added here if needed */
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
   font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 18px;
-  box-shadow: 0 1.5px 8px 0 rgba(45, 140, 240, 0.07);
-  transition: background 0.2s;
+  line-height: 1rem;
 }
-.add-btn:hover {
-  background: linear-gradient(90deg, #60a5fa, #6366f1);
+
+.status-active {
+  background-color: #dcfce7;
+  color: #166534;
 }
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #f8fafc;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 1.5px 8px 0 rgba(45, 140, 240, 0.04);
+
+.status-inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
 }
-.admin-table th,
-.admin-table td {
-  border: 1px solid #e6e6e6;
-  padding: 12px 18px;
-  text-align: left;
-  font-size: 1.07rem;
-}
-.admin-table th {
-  background: #f0f7ff;
-  color: #0284c7;
-  font-weight: 700;
-}
-.mono {
-  font-family: monospace;
-  color: #6366f1;
-}
-.edit-btn {
-  background: #e0e7ff;
-  color: #6366f1;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 18px;
-  font-size: 1.02rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-right: 8px;
-  transition: background 0.2s;
-}
-.edit-btn:hover {
-  background: #6366f1;
-  color: #fff;
-}
-.edit-btn.cancel {
-  background: #f1f5f9;
-  color: #bbb;
-}
-.edit-btn.delete {
-  background: #fee2e2;
-  color: #ef4444;
-}
-.edit-btn.delete:hover {
-  background: #ef4444;
-  color: #fff;
-}
-.admin-empty {
-  color: #bbb;
-  font-size: 1.03rem;
-  padding: 8px 0;
+
+/* Empty state */
+.empty-state {
+  padding: 3rem 1.5rem;
   text-align: center;
+  color: #6b7280;
 }
-.admin-filter-bar {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  margin-bottom: 12px;
+
+.empty-state svg {
+  margin: 0 auto 1rem;
+  color: #d1d5db;
 }
-.admin-filter-select {
-  padding: 6px 18px;
-  border-radius: 8px;
-  border: 1.5px solid #e0e7ef;
-  font-size: 1.05rem;
-  color: #6366f1;
-  background: #f8fafc;
-}
-.group-manage-btn {
-  background: #e0e7ff;
-  color: #6366f1;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 16px;
-  font-size: 1.01rem;
+
+.empty-state h3 {
+  font-size: 1.125rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  color: #111827;
+  margin-bottom: 0.5rem;
 }
-.group-manage-btn:hover {
-  background: #6366f1;
-  color: #fff;
+
+.empty-state p {
+  margin-bottom: 1.5rem;
 }
-.modal-mask {
-  position: fixed;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.18);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  /* Add responsive styles here if needed */
 }
-.modal-dialog {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 18px 0 rgba(45, 140, 240, 0.13);
-  padding: 28px 32px 18px 32px;
-  min-width: 320px;
-  max-width: 96vw;
-}
-.modal-title {
-  font-size: 1.13rem;
-  font-weight: bold;
-  color: #6366f1;
-  margin-bottom: 18px;
-}
+
+/* Modal styles */
 .modal-form-item {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.5rem;
 }
+
 .modal-form-item label {
-  font-size: 1.01rem;
-  color: #555;
+  font-size: 0.875rem;
+  color: #4b5563;
+  font-weight: 500;
 }
-.modal-form-item input,
-.modal-form-item select {
-  padding: 7px 12px;
-  border-radius: 7px;
-  border: 1.5px solid #e0e7ef;
-  font-size: 1.05rem;
-  color: #6366f1;
-  background: #f8fafc;
-}
+
 .modal-form-actions {
   display: flex;
-  gap: 18px;
+  gap: 1rem;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 1.5rem;
 }
+
+.modal-content {
+  color: #4b5563;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
 .modal-error {
   color: #ef4444;
   font-size: 0.98rem;
   margin-top: 8px;
   text-align: right;
 }
-.modal-content {
-  font-size: 1.05rem;
-  color: #444;
-  margin-bottom: 18px;
-}
+
 .param-row {
   display: flex;
   gap: 8px;
@@ -472,5 +510,30 @@ function closeGroupManage() {
 }
 textarea {
   resize: vertical;
+}
+@media (max-width: 900px) {
+  .admin-section-title { font-size: 1rem; }
+  .add-btn { font-size: 0.98rem; padding: 7px 10px; }
+  .admin-table th, .admin-table td { font-size: 0.95rem; padding: 7px 4px; }
+  .admin-table { border-radius: 6px; }
+  .admin-filter-bar { flex-wrap: wrap; gap: 8px; }
+  .admin-filter-select { font-size: 0.98rem; padding: 5px 8px; }
+  .edit-btn, .group-manage-btn { font-size: 0.95rem; padding: 5px 10px; }
+  .modal-dialog { padding: 14px 6px 10px 6px; min-width: 90vw; }
+}
+@media (max-width: 700px) {
+  .admin-section-title { font-size: 0.98rem; }
+  .add-btn { font-size: 0.92rem; padding: 6px 6px; }
+  .admin-table th, .admin-table td { font-size: 0.9rem; padding: 5px 2px; }
+  .admin-table { border-radius: 4px; }
+  .admin-filter-bar { flex-direction: column; align-items: stretch; gap: 6px; }
+  .admin-filter-select { font-size: 0.92rem; padding: 4px 6px; }
+  .edit-btn, .group-manage-btn { font-size: 0.9rem; padding: 4px 7px; margin-right: 4px; }
+  .modal-dialog { padding: 8px 2px 6px 2px; min-width: 98vw; }
+  .modal-title { font-size: 1rem; }
+  .modal-form-item label { font-size: 0.95rem; }
+  .modal-form-item input, .modal-form-item select { font-size: 0.95rem; }
+  .modal-form-actions { gap: 8px; }
+  .admin-empty { font-size: 0.95rem; }
 }
 </style>

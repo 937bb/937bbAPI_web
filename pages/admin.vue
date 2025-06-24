@@ -31,6 +31,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useGlobalConfig } from '~/utils/globalConfig.js'
+const { siteName, icp, icpUrl } = useGlobalConfig();
 const siderCollapsed = ref(false)
 const route = useRoute()
 const isUserPage = computed(() => route.path.startsWith('/admin/users'))

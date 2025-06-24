@@ -158,15 +158,16 @@
 import { ref, reactive, computed } from "vue";
 import MessageModal from "~/components/MessageModal.vue";
 import { useRoute, useRouter } from "vue-router";
+import { useGlobalConfig } from "~/utils/globalConfig.js";
 import {
 	getApiDetail,
 	updateApi,
-	createApi, // 新增API方法，需在 utils/api/index.js 实现
+	createApi,
 	getGroupList,
 	addGroup,
 	deleteGroup,
 } from "~/utils/api/index.js";
-const apiBase = import.meta.env.VITE_API_BASE || "";
+const { apiBase } = useGlobalConfig();
 const route = useRoute();
 const router = useRouter();
 const methodOptions = ["GET", "POST", "PUT", "DELETE", "PATCH"];
@@ -230,7 +231,6 @@ async function handleAddGroup() {
 	const description = "";
 	const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
 	const token = user?.token || "";
-	// console.log("token", token);
 	try {
 		const res = await addGroup(name, description, token);
 		if (res.code === 200) {
@@ -290,7 +290,6 @@ if (!isNew) fetchDetail(); // 仅编辑时请求详情
 else apiData.value = {}; // 新增时直接展示表单
 
 async function submitEdit() {
-	console.log("form", form);
 	if (!form.title.trim() || !form.url.trim() || !form.method || !form.groupId) {
 		showMessage("请填写完整信息", "warn");
 		return;

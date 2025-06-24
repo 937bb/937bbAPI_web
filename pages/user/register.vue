@@ -1,29 +1,113 @@
 <template>
-  <div class="user-auth-bg">
-    <div class="user-auth-card">
-      <div class="user-auth-title">注册新账号</div>
-      <form @submit.prevent="onRegister">
-        <div class="form-group">
-          <input v-model="form.account" type="text" placeholder="账号 (4-16位字母或数字)" required minlength="4" maxlength="16" />
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm">
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          注册新账号
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          已有账号？
+          <NuxtLink to="/user/login" class="font-medium text-blue-600 hover:text-blue-500">
+            去登录
+          </NuxtLink>
+        </p>
+      </div>
+      <form class="mt-8 space-y-6" @submit.prevent="onRegister">
+        <div class="rounded-md shadow-sm space-y-4">
+          <div>
+            <label for="account" class="sr-only">账号</label>
+            <input
+              id="account"
+              v-model="form.account"
+              name="account"
+              type="text"
+              required
+              minlength="4"
+              maxlength="16"
+              class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="账号 (4-16位字母或数字)"
+            >
+          </div>
+          <div>
+            <label for="email" class="sr-only">邮箱</label>
+            <input
+              id="email"
+              v-model="form.email"
+              name="email"
+              type="email"
+              required
+              class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="邮箱"
+            >
+          </div>
+          <div class="flex space-x-2">
+            <div class="flex-1">
+              <label for="emailCode" class="sr-only">邮箱验证码</label>
+              <input
+                id="emailCode"
+                v-model="form.emailCode"
+                name="emailCode"
+                type="text"
+                required
+                maxlength="6"
+                class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="邮箱验证码"
+              >
+            </div>
+            <button
+              type="button"
+              @click="sendCode"
+              :disabled="codeCountdown > 0 || sendingCode"
+              class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ sendingCode ? '发送中...' : (codeCountdown > 0 ? codeCountdown + 's' : '获取验证码') }}
+            </button>
+          </div>
+          <div>
+            <label for="password" class="sr-only">密码</label>
+            <input
+              id="password"
+              v-model="form.password"
+              name="password"
+              type="password"
+              required
+              minlength="6"
+              maxlength="20"
+              class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="密码 (6-20位，需包含字母和数字)"
+            >
+          </div>
+          <div>
+            <label for="password2" class="sr-only">重复密码</label>
+            <input
+              id="password2"
+              v-model="form.password2"
+              name="password2"
+              type="password"
+              required
+              minlength="6"
+              maxlength="20"
+              class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="重复密码"
+            >
+          </div>
         </div>
-        <div class="form-group">
-          <input v-model="form.email" type="email" placeholder="邮箱" required />
-        </div>
-        <div class="form-group form-group-code">
-          <input v-model="form.emailCode" type="text" placeholder="邮箱验证码" required maxlength="6" />
-          <button type="button" class="btn-code" :disabled="codeCountdown>0||sendingCode" @click="sendCode">
-            {{ sendingCode ? '发送中...' : (codeCountdown>0 ? codeCountdown+'s' : '获取验证码') }}
+
+        <div>
+          <button
+            type="submit"
+            :disabled="loading"
+            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="{'opacity-50 cursor-not-allowed': loading}"
+          >
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            {{ loading ? '注册中...' : '注册' }}
           </button>
-        </div>
-        <div class="form-group">
-          <input v-model="form.password" type="password" placeholder="密码 (6-20位，需包含字母和数字)" required minlength="6" maxlength="20" />
-        </div>
-        <div class="form-group">
-          <input v-model="form.password2" type="password" placeholder="重复密码" required minlength="6" maxlength="20" />
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn-main" :disabled="loading">{{ loading ? '注册中...' : '注册' }}</button>
-          <NuxtLink to="/user/login" class="btn-link">已有账号？去登录</NuxtLink>
         </div>
       </form>
     </div>
@@ -124,18 +208,5 @@ const onRegister = async () => {
 </script>
 
 <style scoped>
-.user-auth-bg { min-height: 100vh; background: linear-gradient(120deg, #e0e7ff 0%, #f0f9ff 100%); display: flex; align-items: center; justify-content: center; }
-.user-auth-card { background: #fff; border-radius: 18px; box-shadow: 0 4px 24px 0 rgba(56,189,248,0.10); padding: 38px 32px 28px 32px; min-width: 320px; max-width: 98vw; display: flex; flex-direction: column; align-items: center; }
-.user-auth-title { font-size: 1.6rem; font-weight: bold; color: #6366f1; margin-bottom: 28px; }
-.form-group { margin-bottom: 18px; width: 100%; }
-.form-group input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1.5px solid #e0e7ef; font-size: 1.08rem; outline: none; transition: border 0.2s; }
-.form-group input:focus { border-color: #6366f1; }
-.form-group-code { display: flex; gap: 10px; align-items: center; }
-.btn-code { background: #e0e7ff; color: #6366f1; border: none; border-radius: 8px; padding: 10px 18px; font-size: 1.02rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-.btn-code:disabled { background: #f1f5f9; color: #bbb; cursor: not-allowed; }
-.form-actions { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 18px; }
-.btn-main { background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%); color: #fff; border: none; border-radius: 8px; padding: 10px 32px; font-size: 1.08rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-.btn-main:hover { background: #6366f1; }
-.btn-link { color: #6366f1; text-decoration: underline; font-size: 1.02rem; }
-@media (max-width: 600px) { .user-auth-card { padding: 18px 6vw 18px 6vw; min-width: 0; } }
+/* Styles are now handled by Tailwind CSS classes */
 </style>

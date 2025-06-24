@@ -1,17 +1,60 @@
 <template>
-  <div class="user-auth-bg">
-    <div class="user-auth-card">
-      <div class="user-auth-title">用户登录</div>
-      <form @submit.prevent="onLogin">
-        <div class="form-group">
-          <input v-model="form.account" type="text" placeholder="账号/邮箱" required />
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm">
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          用户登录
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          或
+          <NuxtLink to="/user/register" class="font-medium text-blue-600 hover:text-blue-500">
+            注册新账号
+          </NuxtLink>
+        </p>
+      </div>
+      <form class="mt-8 space-y-6" @submit.prevent="onLogin">
+        <div class="rounded-md shadow-sm space-y-4">
+          <div>
+            <label for="email" class="sr-only">账号/邮箱</label>
+            <input
+              id="email"
+              v-model="form.account"
+              name="email"
+              type="text"
+              required
+              class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="账号/邮箱"
+            >
+          </div>
+          <div>
+            <label for="password" class="sr-only">密码</label>
+            <input
+              id="password"
+              v-model="form.password"
+              name="password"
+              type="password"
+              required
+              class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="密码"
+            >
+          </div>
         </div>
-        <div class="form-group">
-          <input v-model="form.password" type="password" placeholder="密码" required />
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn-main" :disabled="loading">{{ loading ? '登录中...' : '登录' }}</button>
-          <NuxtLink to="/user/register" class="btn-link">注册新账号</NuxtLink>
+
+        <div>
+          <button
+            type="submit"
+            :disabled="loading"
+            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="{'opacity-50 cursor-not-allowed': loading}"
+          >
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            {{ loading ? '登录中...' : '登录' }}
+          </button>
         </div>
       </form>
     </div>
@@ -24,7 +67,9 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import MessageModal from '~/components/MessageModal.vue'
 import { login } from '~/utils/api/index.js'
+import { useUser } from '~/composables/useUser'
 const router = useRouter()
+const { login: userLogin } = useUser()
 const form = ref({ account: '', password: '' })
 const loading = ref(false)
 const messageModal = ref({ show: false, text: '', type: 'info' })
@@ -57,7 +102,8 @@ const onLogin = async () => {
       passwd: form.value.password
     })
     if (res.code === 200 && res.data) {
-      localStorage.setItem('user', JSON.stringify(res.data))
+      // Update user state using the useUser composable
+      userLogin(res.data)
       showMessage('登录成功', 'success');
       setTimeout(() => router.push('/user/center'), 800)
     } else {
@@ -72,76 +118,5 @@ const onLogin = async () => {
 </script>
 
 <style scoped>
-.user-auth-bg {
-  min-height: 100vh;
-  background: linear-gradient(120deg, #e0e7ff 0%, #f0f9ff 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.user-auth-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(56,189,248,0.10);
-  padding: 38px 32px 28px 32px;
-  min-width: 320px;
-  max-width: 98vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.user-auth-title {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: #6366f1;
-  margin-bottom: 28px;
-}
-.form-group {
-  margin-bottom: 18px;
-  width: 100%;
-}
-.form-group input {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1.5px solid #e0e7ef;
-  font-size: 1.08rem;
-  outline: none;
-  transition: border 0.2s;
-}
-.form-group input:focus {
-  border-color: #6366f1;
-}
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: 18px;
-}
-.btn-main {
-  background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 32px;
-  font-size: 1.08rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-main:hover {
-  background: #6366f1;
-}
-.btn-link {
-  color: #6366f1;
-  text-decoration: underline;
-  font-size: 1.02rem;
-}
-@media (max-width: 600px) {
-  .user-auth-card {
-    padding: 18px 6vw 18px 6vw;
-    min-width: 0;
-  }
-}
+/* Styles are now handled by Tailwind CSS classes */
 </style>
