@@ -18,6 +18,7 @@ export const API = {
   GET_GROUP_LIST: "/api/web/getGroupList",
   DELETE_GROUP: "/api/web/deleteGroupById",
   ADD_GROUP: "/api/web/addGroup",
+  GET_TODAY_STATS: "/api/web/getTodayStatistics",
 };
 
 // 业务接口请求封装
@@ -258,14 +259,25 @@ export function getApiStats(token) {
  * @returns {Promise<Blob>} 返回文件Blob的Promise
  */
 export function exportApis(format = 'json', token) {
-	return $apiFetch(`/api/web/exportApis?format=${format}`, {
-		method: 'GET',
-		headers: { 
-			'Content-Type': 'application/json',
-			Authorization: token ? `Bearer ${token}` : '' 
-		},
-		responseType: 'blob'
-	});
+  return $apiFetch(`${API.EXPORT_APIS}?format=${format}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    responseType: 'blob' // 确保正确处理二进制响应
+  });
+}
+
+/**
+ * 获取今日统计信息
+ * @param {string} token - 认证token
+ * @returns {Promise<Object>} 返回今日统计数据的Promise
+ */
+export function getTodayStatistics(token) {
+  return $apiFetch(API.GET_TODAY_STATS, {
+    method: 'GET',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  });
 }
 
 // 其他接口可继续补充...

@@ -227,6 +227,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getTodayStatistics } from '~/utils/api';
 
 const router = useRouter();
 const loading = ref(false);
@@ -264,16 +265,24 @@ const recentActivities = ref([
 const fetchDashboardData = async () => {
   try {
     loading.value = true;
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/admin/dashboard');
-    // const data = await response.json();
-    // stats.value = data.stats;
     
-    // Mock data for now
+    // Get user token from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = user?.token;
+    
+    // Fetch today's statistics
+    if (token) {
+      const statsData = await getTodayStatistics(token);
+      if (statsData && statsData.code === 200) {
+        stats.value.todayRequests = statsData.data?.totalRequests || 0;
+      }
+    }
+    
+    // TODO: Replace other stats with actual API calls
     stats.value = {
+      ...stats.value,
       totalApis: 24,
       totalUsers: 156,
-      todayRequests: 1245,
       errorRate: 1.2
     };
   } catch (error) {
