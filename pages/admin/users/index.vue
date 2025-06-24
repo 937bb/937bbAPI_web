@@ -269,6 +269,23 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+// API配置
+const API_BASE_URL = '/api/admin/users'
+
+// 添加请求拦截器
+const addTokenToHeaders = (headers = {}) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+  return headers
+}
+
+// 封装API请求
+const apiFetch = async (path, options = {}) => {
+  options.headers = addTokenToHeaders(options.headers)
+  return $apiFetch(path, options)
+}
 import MessageModal from '~/components/MessageModal.vue'
 import { getUserList } from '~/utils/api/index.js'
 
@@ -277,9 +294,15 @@ const users = ref([])
 const loading = ref(false)
 const showAddDialog = ref(false)
 const editingUser = ref({ id: null, username: '', password: '', nickname: '', email: '', role: 'user', status: '0' })
+const addForm = ref({ username: '', password: '', nickname: '', email: '', role: 'user', status: '0' })
 const messageModal = ref({ show: false, text: '', type: 'info' })
 const deleteDialogVisible = ref(false)
 const deleteTarget = ref(null)
+
+// 同步编辑用户和表单数据
+watch(editingUser, (newValue) => {
+  addForm.value = { ...newValue }
+}, { deep: true })
 
 // 显示消息提示
 function showMessage(text, type = 'info', duration = 3000) {
@@ -330,6 +353,8 @@ onMounted(() => {
 function openAddUser() {
   editingUser.value = { id: null, username: '', password: '', nickname: '', email: '', role: 'user', status: '0' }
   showAddDialog.value = true
+  // 重置表单数据
+  addForm.value = { ...editingUser.value }
 }
 
 // 编辑用户
@@ -365,33 +390,33 @@ async function submitAdd() {
   }
   
   try {
-    // 这里调用实际的添加/更新用户接口
+    // 显示加载状态
+    loading.value = true
+    
     if (form.id) {
       // 更新用户
-      const index = users.value.findIndex(u => u.id === form.id)
-      if (index !== -1) {
-        const { password, ...userData } = form
-        users.value[index] = { ...users.value[index], ...userData }
-      }
+      await apiFetch(`${API_BASE_URL}/${form.id}`, {
+        method: 'PUT',
+        body: form
+      })
       showMessage('更新成功', 'success')
     } else {
       // 添加用户
-      if (users.value.some(u => u.username === form.username)) {
-        showMessage('用户名已存在', 'warn')
-        return
-      }
-      const newUser = {
-        ...form,
-        id: Date.now().toString(),
-        createTime: new Date().toISOString()
-      }
-      users.value = [newUser, ...users.value]
+      await apiFetch(API_BASE_URL, {
+        method: 'POST',
+        body: form
+      })
       showMessage('添加成功', 'success')
     }
+    
+    // 重新加载用户列表
+    await fetchUsers()
     closeAddDialog()
   } catch (error) {
     console.error('保存用户失败:', error)
     showMessage(error.message || '保存失败', 'error')
+  } finally {
+    loading.value = false
   }
 }
 

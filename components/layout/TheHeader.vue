@@ -156,34 +156,37 @@
         
         <!-- 移动端认证按钮 -->
         <div class="pt-4 pb-3 border-t border-gray-200 mt-2">
-          <template v-if="isAuthenticated">
-            <div class="flex items-center px-5">
-              <div class="flex-shrink-0">
-                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-                  {{ user?.username?.charAt(0)?.toUpperCase() || 'U' }}
+            <template v-if="isAuthenticated">
+              <ClientOnly>
+                <div class="flex items-center px-5">
+                  <div class="flex-shrink-0">
+                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
+                      {{ user?.username?.charAt(0)?.toUpperCase() || 'U' }}
+                    </div>
+                  </div>
+                  <div class="ml-3">
+                    <div class="text-base font-medium text-gray-800">{{ user?.username || '用户' }}</div>
+                    <div class="text-sm font-medium text-gray-500">{{ user?.email || '' }}</div>
+                  </div>
                 </div>
-              </div>
-              <div class="ml-3">
-                <div class="text-base font-medium text-gray-800">{{ user?.username || '用户' }}</div>
-                <div class="text-sm font-medium text-gray-500">{{ user?.email || '' }}</div>
-              </div>
-            </div>
-            <div class="mt-3 space-y-1">
-              <NuxtLink 
-                to="/user/center"
-                @click="closeMobileMenu"
-                class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-              >
-                个人中心
-              </NuxtLink>
-              <button 
-                @click="handleLogout"
-                class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"
-              >
-                退出登录
-              </button>
-            </div>
-          </template>
+                <div class="mt-3 space-y-1">
+                  <NuxtLink 
+                    to="/user/center"
+                    @click="closeMobileMenu"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                  >
+                    个人中心
+                  </NuxtLink>
+                  <NuxtLink 
+                    to="/user/logout"
+                    @click="handleLogout"
+                    class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"
+                  >
+                    退出登录
+                  </NuxtLink>
+                </div>
+              </ClientOnly>
+            </template>
           <template v-else>
             <NuxtLink 
               to="/user/login"
@@ -192,16 +195,15 @@
             >
               登录
             </NuxtLink>
-            <p class="mt-3 text-center text-sm text-gray-600">
-              还没有账号？
+            <div class="mt-3 text-center text-sm text-gray-600">
               <NuxtLink 
                 to="/user/register"
                 @click="closeMobileMenu"
                 class="font-medium text-blue-600 hover:text-blue-500"
               >
-                立即注册
+                还没有账号？立即注册
               </NuxtLink>
-            </p>
+            </div>
           </template>
         </div>
       </div>
@@ -221,7 +223,7 @@ const route = useRoute();
 const router = useRouter();
 
 // 用户相关状态
-const { user, logout: userLogout } = useUser();
+const { user, logout: userLogout, isAuthenticated } = useUser();
 const isMobileMenuOpen = ref(false);
 
 // 导航菜单项
@@ -232,8 +234,11 @@ const navItems = computed(() => [
   { name: '关于', path: '/about' },
 ]);
 
-// 用户认证状态
-const { isAuthenticated } = useUser();
+// 用于处理SSR的计算属性
+const isClient = computed(() => typeof window !== 'undefined')
+
+// 确保在服务器端渲染时使用div包裹
+const renderAsDiv = computed(() => !isClient.value)
 
 // 关闭移动端菜单
 const closeMobileMenu = () => {
