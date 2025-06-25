@@ -26,6 +26,9 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
   ],
+  plugins: [
+    '~/plugins/notifications.js'
+  ],
   tailwindcss: {
     cssPath: '~/assets/main.css',
     configPath: 'tailwind.config',
@@ -49,7 +52,10 @@ export default defineNuxtConfig({
       title: '937bb API 文档',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { 
+          name: 'viewport', 
+          content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover' 
+        },
         { name: 'description', content: '937bb API 文档' },
       ],
       link: [

@@ -54,53 +54,6 @@
           </template>
         </div>
 
-        <!-- 移动端菜单 -->
-        <div class="md:hidden">
-          <div class="pt-2 pb-3 space-y-1">
-            <NuxtLink 
-              v-for="item in navItems" 
-              :key="'mobile-' + item.path" 
-              :to="item.path"
-              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-              @click="closeMobileMenu"
-            >
-              {{ item.name }}
-            </NuxtLink>
-          </div>
-          <div class="pt-4 pb-3 border-t border-gray-200">
-            <div v-if="isAuthenticated" class="space-y-1">
-              <NuxtLink 
-                to="/user/center" 
-                class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                @click="closeMobileMenu"
-              >
-                个人中心
-              </NuxtLink>
-              <button 
-                @click="handleLogout"
-                class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50"
-              >
-                退出登录
-              </button>
-            </div>
-            <div v-else class="space-y-1">
-              <NuxtLink 
-                to="/user/login" 
-                class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                @click="closeMobileMenu"
-              >
-                登录
-              </NuxtLink>
-              <NuxtLink 
-                to="/user/register" 
-                class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:bg-blue-50"
-                @click="closeMobileMenu"
-              >
-                注册
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
 
         <!-- 移动端菜单按钮 -->
         <div class="md:hidden flex items-center">

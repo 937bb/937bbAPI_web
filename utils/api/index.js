@@ -46,10 +46,24 @@ export function login({ account, passwd }) {
 }
 
 // 获取用户列表（需带 token）
-export function getUserList(token) {
-  return $apiFetch(API.GET_USER_LIST, {
+export function getUserList(token, params = {}) {
+  // 处理分页参数
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append('page', params.page);
+  if (params.pageSize) queryParams.append('pageSize', params.pageSize);
+  
+  let url = API.GET_USER_LIST;
+  const queryString = queryParams.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
+  
+  return $apiFetch(url, {
     method: "GET",
-    headers: { Authorization: token ? `Bearer ${token}` : "" },
+    headers: { 
+      'Content-Type': 'application/json',
+      Authorization: token ? `Bearer ${token}` : '' 
+    }
   });
 }
 
@@ -71,8 +85,19 @@ export function updateUser(data, token) {
 }
 
 // 获取API列表（需带token）
-export function getApiList(token) {
-  return $apiFetch(API.GET_API_LIST, {
+export function getApiList(token, params = {}) {
+  // 处理分页参数
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append('page', params.page);
+  if (params.pageSize) queryParams.append('pageSize', params.pageSize);
+  
+  let url = API.GET_API_LIST;
+  const queryString = queryParams.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
+  
+  return $apiFetch(url, {
     method: "GET",
     headers: { 
       'Content-Type': 'application/json',

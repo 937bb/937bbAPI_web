@@ -1,229 +1,417 @@
 <template>
-	<div class="min-h-screen bg-gray-100">
-		<!-- Sidebar -->
-		<div
-			class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-blue-700 to-blue-800 shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-30"
-			:class="{ 'translate-x-0': mobileMenuOpen }"
-		>
-			<div class="flex items-center justify-center h-16 px-4 border-b border-blue-600">
-				<h1 class="text-xl font-bold text-white">API 管理后台</h1>
-			</div>
-			<nav class="px-2 py-4">
-				<NuxtLink
-					to="/admin"
-					class="flex items-center px-4 py-3 text-sm font-medium rounded-lg mx-2 transition-colors duration-200"
-					:class="$route.path === '/admin' ? 'bg-blue-600 text-white shadow-md' : 'text-blue-100 hover:bg-blue-600/50'"
-				>
-					<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-						/>
-					</svg>
-					控制台
-				</NuxtLink>
-				<NuxtLink
-					to="/admin/api"
-					class="flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg mx-2 transition-colors duration-200"
-					:class="$route.path.startsWith('/admin/api') ? 'bg-blue-600 text-white shadow-md' : 'text-blue-100 hover:bg-blue-600/50'"
-				>
-					<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-						/>
-					</svg>
-					API 管理
-				</NuxtLink>
-				<NuxtLink
-					to="/admin/users"
-					class="flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg mx-2 transition-colors duration-200"
-					:class="$route.path.startsWith('/admin/users') ? 'bg-blue-600 text-white shadow-md' : 'text-blue-100 hover:bg-blue-600/50'"
-				>
-					<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-						/>
-					</svg>
-					用户管理
-				</NuxtLink>
-			</nav>
-		</div>
+  <div class="admin-layout">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button class="menu-toggle" @click="toggleMobileMenu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <div class="mobile-title">
+        <span v-if="isUserPage">用户管理</span>
+        <span v-else-if="isApiPage">API接口管理</span>
+        <span v-else>后台管理</span>
+      </div>
+    </header>
 
-		<!-- Main Content -->
-		<div class="md:pl-64 transition-all duration-300">
-			<!-- Top Navigation -->
-			<header class="bg-white shadow-sm sticky top-0 z-20">
-				<div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-					<!-- Mobile menu button -->
-					<button
-						@click="mobileMenuOpen = !mobileMenuOpen"
-						class="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none"
-						aria-label="Toggle menu"
-					>
-						<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-							<path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-						</svg>
-					</button>
+    <!-- Mobile Menu Overlay -->
+    <div 
+      :class="['mobile-overlay', { active: mobileMenuOpen }]"
+      @click="closeMobileMenu"
+    ></div>
 
-					<div class="flex-1 flex justify-between items-center">
-						<h2 class="text-lg font-medium text-gray-900 hidden md:block">
-							{{ pageTitle }}
-						</h2>
-						<div class="flex items-center space-x-4">
-							<button class="p-2 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-full">
-								<span class="sr-only">通知</span>
-								<div class="relative">
-									<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-										/>
-									</svg>
-									<span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-								</div>
-							</button>
-							<div class="relative">
-								<button
-									@click="userMenuOpen = !userMenuOpen"
-									class="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none"
-								>
-									<span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white">
-										{{ userInitials }}
-									</span>
-									<span class="hidden md:inline-block">{{ user?.account || "管理员" }}</span>
-									<svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-									</svg>
-								</button>
-								<transition
-									enter-active-class="transition ease-out duration-100"
-									enter-from-class="transform opacity-0 scale-95"
-									enter-to-class="transform opacity-100 scale-100"
-									leave-active-class="transition ease-in duration-75"
-									leave-from-class="transform opacity-100 scale-100"
-									leave-to-class="transform opacity-0 scale-95"
-								>
-									<div
-										v-if="userMenuOpen"
-										class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
-										role="menu"
-										aria-orientation="vertical"
-										aria-labelledby="user-menu"
-									>
-										<div class="py-1" role="none">
-											<NuxtLink to="/user/center" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" @click="userMenuOpen = false">
-												个人中心
-											</NuxtLink>
-											<button @click="handleLogout" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">退出登录</button>
-										</div>
-									</div>
-								</transition>
-							</div>
-						</div>
-					</div>
-				</div>
-			</header>
+    <!-- Sidebar -->
+    <aside 
+      class="admin-sider" 
+      :class="{
+        'collapsed': siderCollapsed,
+        'mobile-open': mobileMenuOpen
+      }"
+    >
+      <div class="admin-logo">API 后台管理</div>
+      <nav class="admin-menu">
+        <NuxtLink
+          to="/admin"
+          :class="['admin-menu-item', { active: isConsolePage }]"
+          @click="closeMobileMenu"
+        >
+          <span>控制台</span>
+        </NuxtLink>
+        <NuxtLink
+          to="/admin/users"
+          :class="['admin-menu-item', { active: isUserPage }]"
+          @click="closeMobileMenu"
+        >
+          <span>用户管理</span>
+        </NuxtLink>
+        <NuxtLink
+          to="/admin/api"
+          :class="['admin-menu-item', { active: isApiPage }]"
+          @click="closeMobileMenu"
+        >
+          <span>API管理</span>
+        </NuxtLink>
+      </nav>
+      <div class="admin-sider-toggle" @click="siderCollapsed = !siderCollapsed">
+        <span>{{ siderCollapsed ? "→" : "←" }}</span>
+      </div>
+    </aside>
 
-			<!-- Mobile menu -->
-			<div v-if="mobileMenuOpen" class="md:hidden bg-white shadow-lg">
-				<div class="px-2 pt-2 pb-3 space-y-1">
-					<NuxtLink
-						to="/admin"
-						@click="mobileMenuOpen = false"
-						class="block px-3 py-2 rounded-md text-base font-medium"
-						:class="$route.path === '/admin' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-					>
-						控制台
-					</NuxtLink>
-					<NuxtLink
-						to="/admin/api"
-						@click="mobileMenuOpen = false"
-						class="block px-3 py-2 rounded-md text-base font-medium"
-						:class="$route.path.startsWith('/admin/api') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-					>
-						API 管理
-					</NuxtLink>
-					<NuxtLink
-						to="/admin/users"
-						@click="mobileMenuOpen = false"
-						class="block px-3 py-2 rounded-md text-base font-medium"
-						:class="$route.path.startsWith('/admin/users') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-					>
-						用户管理
-					</NuxtLink>
-				</div>
-			</div>
-
-			<!-- Page Content -->
-			<main class="min-h-screen">
-				<!-- Back to dashboard -->
-				<div v-if="!$route.meta?.hideBreadcrumb" class="bg-white px-6 py-4 shadow-sm">
-					<div class="max-w-7xl mx-auto">
-						<div class="flex items-center">
-							<NuxtLink to="/admin" class="text-gray-500 hover:text-blue-600 transition-colors duration-200 flex items-center">
-								<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-									/>
-								</svg>
-								返回控制台
-							</NuxtLink>
-							<span class="mx-2 text-gray-400">/</span>
-							<h1 class="text-lg font-medium text-gray-900">{{ $route.meta?.title || "Dashboard" }}</h1>
-						</div>
-					</div>
-				</div>
-
-				<!-- Main content area -->
-				<div class="px-4 py-6 sm:px-6 lg:px-8">
-					<slot></slot>
-				</div>
-			</main>
-		</div>
-	</div>
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="admin-content">
+        <NuxtPage />
+      </div>
+      <footer class="admin-footer">
+        <p>© 2025 API 后台管理</p>
+        <p v-if="icp" class="mt-1 text-sm text-gray-500">
+          <a :href="icpUrl" target="_blank" class="hover:underline">{{ icp }}</a>
+        </p>
+      </footer>
+    </main>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
+import { useGlobalConfig } from "~/utils/globalConfig.js";
 
-const route = useRoute();
+const { siteName, icp, icpUrl } = useGlobalConfig();
+const siderCollapsed = ref(false);
 const mobileMenuOpen = ref(false);
-const userMenuOpen = ref(false);
+const route = useRoute();
 
-// 计算用户首字母
-const userInitials = computed(() => {
-	const name = route.meta?.user?.name || "管理员";
-	return name.charAt(0).toUpperCase();
-});
+const isConsolePage = computed(() => route.path === "/admin");
+const isUserPage = computed(() => route.path.startsWith("/admin/users"));
+const isApiPage = computed(() => route.path.startsWith("/admin/api"));
 
-// 计算页面标题
-const pageTitle = computed(() => {
-	return route.meta?.title || "Dashboard";
-});
-
-// 处理登出
-const handleLogout = () => {
-	// 实现登出逻辑
-	localStorage.removeItem("token");
-	window.location.href = "/login";
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+  // Prevent body scroll when menu is open
+  if (process.client) {
+    document.body.style.overflow = mobileMenuOpen.value ? 'hidden' : '';
+  }
 };
+
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false;
+  if (process.client) {
+    document.body.style.overflow = '';
+  }
+};
+
+// Close mobile menu when route changes
+watch(() => route.path, () => {
+  closeMobileMenu();
+});
+
+// Close menu when clicking outside on mobile
+const handleClickOutside = (event) => {
+  const sidebar = document.querySelector('.admin-sider');
+  const menuButton = document.querySelector('.menu-toggle');
+  
+  if (mobileMenuOpen.value && 
+      !sidebar.contains(event.target) && 
+      !menuButton.contains(event.target)) {
+    closeMobileMenu();
+  }
+};
+
+// Add/remove event listener for outside clicks
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>
-/* 添加任何需要的样式 */
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  position: relative;
+}
+
+/* Mobile Header */
+.mobile-header {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 56px;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  padding: 8px;
+  margin-right: 12px;
+  cursor: pointer;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.admin-sider {
+  width: 250px;
+  background-color: #001529;
+  color: #fff;
+  transition: transform 0.3s ease-in-out;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+}
+
+.admin-sider.mobile-open {
+  transform: translateX(0);
+}
+
+@media (min-width: 769px) {
+  .admin-sider {
+    transform: none;
+    left: 0;
+  }
+  
+  .admin-sider.collapsed {
+    width: 80px;
+  }
+  
+  .admin-sider:not(.collapsed) + .admin-main {
+    margin-left: 250px;
+  }
+  
+  .admin-sider.collapsed + .admin-main {
+    margin-left: 80px;
+  }
+}
+
+.admin-sider.collapsed {
+  width: 80px;
+}
+
+.admin-logo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid #002140;
+}
+
+.admin-menu {
+  padding: 16px 0;
+}
+
+.admin-menu-item {
+  display: block;
+  padding: 12px 24px;
+  color: rgba(255, 255, 255, 0.65);
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.admin-menu-item:hover {
+  color: #fff;
+  background-color: #1890ff;
+}
+
+.admin-menu-item.active {
+  color: #fff;
+  background-color: #1890ff;
+}
+
+.admin-sider-toggle {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: #002140;
+  color: #fff;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin-top: 56px;
+  transition: margin 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+@media (min-width: 769px) {
+  .admin-main {
+    margin-top: 0;
+    padding: 24px;
+    margin-left: 250px;
+    width: calc(100% - 250px);
+  }
+  
+  .admin-sider.collapsed + .admin-main {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+  }
+  
+  .admin-content {
+    padding: 24px;
+  }
+}
+
+.admin-content {
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0 auto;
+  background-color: #f5f7fa;
+}
+
+/* Ensure content takes full width on mobile */
+.admin-content > div {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Ensure pages have consistent padding */
+.admin-content > div > div:first-child {
+  padding: 1rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Add consistent spacing for mobile */
+@media (max-width: 768px) {
+  .admin-content > div > div:first-child {
+    padding: 1rem;
+  }
+  
+  /* Add margin to the main content containers */
+  .admin-content > div > div {
+    margin: 0.5rem;
+  }
+  
+  /* Ensure tables and cards have proper spacing */
+  .bg-white {
+    margin: 0.5rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  
+  /* Add spacing between sections */
+  .space-y-3 > * + * {
+    margin-top: 1rem;
+  }
+}
+
+.admin-footer {
+  padding: 16px 24px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 响应式设计 */
+@media (min-width: 769px) {
+  .mobile-header,
+  .mobile-overlay {
+    display: none;
+  }
+  
+  .admin-content {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  .admin-sider {
+    position: fixed;
+    left: 0;
+    transform: none;
+    width: 200px;
+  }
+  
+  .admin-main {
+    margin-left: 200px;
+    margin-top: 0;
+  }
+  
+  .admin-sider.collapsed + .admin-main {
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-overlay {
+    display: block;
+  }
+  
+  .admin-sider {
+    transform: translateX(-100%);
+  }
+  
+  .admin-sider.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .admin-main {
+    margin-left: 0;
+  }
+  
+  .admin-sider-toggle {
+    display: none;
+  }
+}
 </style>

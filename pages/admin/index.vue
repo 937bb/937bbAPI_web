@@ -1,7 +1,7 @@
 <template>
-	<div class="py-6">
+	<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
 		<!-- Page Header -->
-		<div class="max-w-7xl mx-auto px-6 mb-8">
+		<div class="mb-6 px-2">
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between">
 				<div>
 					<h2 class="text-2xl font-bold text-gray-900">控制台</h2>
@@ -27,7 +27,7 @@
 		</div>
 
 		<!-- Main Content Container -->
-		<div class="max-w-7xl mx-auto px-6">
+		<div class="max-w-7xl mx-auto ">
 			<!-- Stats Grid -->
 			<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
 				<!-- Total APIs -->
@@ -258,6 +258,11 @@
 </template>
 
 <script setup>
+// 指定使用 admin 布局
+definePageMeta({
+  layout: 'admin'
+});
+
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getTodayStatistics } from "~/utils/api";
@@ -310,7 +315,9 @@ const fetchDashboardData = async () => {
 				stats.value.requestCountTody = statsData.data?.requestCountTody || 0;
 				stats.value.totalApis = statsData.data?.apiCount || 0;
 				stats.value.totalUsers = statsData.data?.userCount || 0;
-				stats.value.errorRate = statsData.data?.errorRate.toFixed(1) || 0;
+				stats.value.errorRate = statsData.data?.errorRate !== null && statsData.data?.errorRate !== undefined 
+					? statsData.data.errorRate.toFixed(1) 
+					: 0;
 			}
 		}
 

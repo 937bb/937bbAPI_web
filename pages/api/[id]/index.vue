@@ -458,7 +458,7 @@ const copyToClipboard = (path) => {
   // Prepend base URL if the path is relative
   const fullUrl = path.startsWith("http")
     ? path
-    : `${apiBase}${path.startsWith("/") ? path.substring(1) : path}`;
+    : `${apiBase}/${path.startsWith("/") ? path.substring(1) : path}`;
 
   // Create a temporary textarea element
   const textarea = document.createElement("textarea");

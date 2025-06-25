@@ -181,7 +181,7 @@ const fetchApis = async () => {
     
     // 处理API列表响应
     if (apiResponse && apiResponse.code === 200) {
-      apis.value = Array.isArray(apiResponse.data) ? apiResponse.data : [];
+      apis.value = Array.isArray(apiResponse.data.list) ? apiResponse.data.list : [];
     } else {
       throw new Error(apiResponse?.message || '获取API列表失败');
     }
