@@ -109,13 +109,6 @@ pnpm preview
 ├── pnpm-lock.yaml         # 依赖版本锁文件
 ├── README.md              # 项目说明
 └── tsconfig.json          # TypeScript 配置
-```
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #f6ad55;">app.vue</span>             <span style="color: #a0aec0;"># 应用入口</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #f6ad55;">nuxt.config.ts</span>      <span style="color: #a0aec0;"># Nuxt配置</span></div>
-      <div><span style="color: #63b3ed;">└──</span> <span style="color: #f6ad55;">tailwind.config.js</span>  <span style="color: #a0aec0;"># Tailwind配置</span></div>
-    </div>
-  </div>
-</div>
 
 ## ⚙️ 环境变量配置
 
@@ -208,32 +201,21 @@ pnpm preview
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 开启 Pull Request
 
-<div style="margin: 3rem 0; text-align: center;">
-  <h2 style="color: #2d3748; margin-bottom: 1.5rem;">👥 贡献者</h2>
-  <p style="color: #4a5568; margin-bottom: 2rem;">感谢所有为项目做出贡献的开发者！</p>
-  
-  <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 2rem;">
-    <div style="text-align: center;">
-      <a href="https://github.com/937bb" target="_blank" style="text-decoration: none; color: inherit;">
-        <div style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.75rem; border: 3px solid #e2e8f0; transition: all 0.3s ease;">
-          <img 
-            src="https://avatars.githubusercontent.com/u/937bb" 
-            alt="937bb" 
-            style="width: 100%; height: 100%; object-fit: cover;"
-            onerror="this.src='https://via.placeholder.com/120?text=937bb'"
-            loading="lazy"
-          >
-        </div>
-        <div style="font-weight: 600; color: #2d3748; margin-top: 0.5rem;">937bb</div>
-        <div style="color: #718096; font-size: 0.875rem;">Maintainer</div>
-      </a>
-    </div>
-  </div>
-  
-  <p style="margin-top: 2rem; color: #4a5568;">
-    想要成为贡献者？请阅读我们的 <a href="#-贡献指南" style="color: #4299e1; text-decoration: none; font-weight: 500;">贡献指南</a>
-  </p>
+## 👥 贡献者
+
+感谢所有为项目做出贡献的开发者！
+
+<div align="center">
+  <a href="https://github.com/937bb" target="_blank">
+    <img src="https://avatars.githubusercontent.com/u/937bb" width="100" height="100" alt="937bb" style="border-radius: 50%; border: 3px solid #e2e8f0;">
+    <br>
+    <strong>937bb</strong>
+    <br>
+    <small>项目维护者</small>
+  </a>
 </div>
+
+想要成为贡献者？请阅读我们的 [贡献指南](#-贡献指南)
 
 <div style="margin: 3rem 0; padding: 2rem; background-color: #f8f9fa; border-radius: 0.5rem;">
   <h2 style="color: #2d3748; margin-top: 0; margin-bottom: 1.5rem; text-align: center;">🔗 相关项目</h2>
