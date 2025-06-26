@@ -63,11 +63,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import MessageModal from '~/components/MessageModal.vue'
-import { login } from '~/utils/api/index.js'
+import { login, sendEmailCode } from '~/utils/api/index.js'
 import { useUser } from '~/composables/useUser'
+import { debounce } from '~/utils/debounce'
 const router = useRouter()
 const { login: userLogin } = useUser()
 const form = ref({ account: '', password: '' })
@@ -86,16 +87,20 @@ function validateAccount(account) {
 function validatePassword(pw) {
   return /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*()_+\-=]{6,20}$/.test(pw)
 }
-const onLogin = async () => {
+// 防抖的登录处理
+const handleLogin = async () => {
+  if (loading.value) return;
+  
   if (!validateAccount(form.value.account)) {
     showMessage('账号需4-16位字母或数字，或邮箱格式', 'warn');
-    return
+    return;
   }
   if (!validatePassword(form.value.password)) {
     showMessage('密码需6-20位且包含字母和数字', 'warn');
-    return
+    return;
   }
-  loading.value = true
+  
+  loading.value = true;
   try {
     const res = await login({
       account: form.value.account,
@@ -114,7 +119,24 @@ const onLogin = async () => {
   } finally {
     loading.value = false
   }
-}
+};
+
+// 使用防抖包装登录处理函数
+const onLogin = debounce(handleLogin, 500, true);
+
+// 组件挂载时设置页面标题
+useHead({
+  title: '用户登录 - 937bbAPI',
+  meta: [
+    { name: 'description', content: '用户登录页面' },
+    { name: 'keywords', content: '登录,用户登录,937bbAPI' }
+  ]
+});
+
+// 组件卸载时取消防抖函数
+onUnmounted(() => {
+  onLogin.cancel?.();
+});
 </script>
 
 <style scoped>

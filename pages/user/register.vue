@@ -116,10 +116,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import MessageModal from '~/components/MessageModal.vue'
-import { sendEmailCode, register } from '~/utils/api/index.js'
+import { register, sendEmailCode } from '~/utils/api/index.js'
+import { debounce } from '~/utils/debounce'
 const router = useRouter()
 const form = ref({ account: '', email: '', emailCode: '', password: '', password2: '' })
 const loading = ref(false)
@@ -146,67 +147,107 @@ function validatePassword(pw) {
 function validateCode(code) {
   return /^\d{4,8}$/.test(code)
 }
-const sendCode = async () => {
-  if (!form.value.email) return showMessage('请填写邮箱', 'warn')
-  if (!validateEmail(form.value.email)) return showMessage('邮箱格式不正确', 'warn')
-  sendingCode.value = true
-  try {
-    await sendEmailCode(form.value.email)
-    codeCountdown.value = 60
-    timer = setInterval(() => {
-      codeCountdown.value--
-      if (codeCountdown.value <= 0) clearInterval(timer)
-    }, 1000)
-    showMessage('验证码已发送', 'success')
-  } catch (e) {
-    showMessage(e.message || '验证码发送失败', 'error')
-  } finally {
-    sendingCode.value = false
-  }
-}
-const onRegister = async () => {
-  if (!validateAccount(form.value.account)) {
-    showMessage('账号需4-16位字母或数字', 'warn')
-    return
+// 发送验证码处理
+const handleSendCode = async () => {
+  if (sendingCode.value) return;
+  
+  if (!form.value.email) {
+    showMessage('请输入邮箱', 'warn');
+    return;
   }
   if (!validateEmail(form.value.email)) {
-    showMessage('邮箱格式不正确', 'warn')
-    return
+    showMessage('邮箱格式不正确', 'warn');
+    return;
+  }
+  
+  sendingCode.value = true;
+  try {
+    await sendEmailCode(form.value.email);
+    codeCountdown.value = 60;
+    timer = setInterval(() => {
+      codeCountdown.value--;
+      if (codeCountdown.value <= 0) clearInterval(timer)
+    }, 1000)
+    showMessage('验证码已发送', 'success');
+  } catch (error) {
+    showMessage(error.message || '发送验证码失败', 'error');
+  } finally {
+    sendingCode.value = false;
+  }
+};
+
+// 使用防抖包装发送验证码函数
+const sendCode = debounce(handleSendCode, 1000, true);
+
+// 注册处理
+const handleRegister = async () => {
+  if (loading.value) return;
+  
+  if (!validateAccount(form.value.account)) {
+    showMessage('账号需4-16位字母或数字', 'warn');
+    return;
+  }
+  if (!validateEmail(form.value.email)) {
+    showMessage('邮箱格式不正确', 'warn');
+    return;
   }
   if (!validateCode(form.value.emailCode)) {
-    showMessage('验证码格式错误', 'warn')
-    return
+    showMessage('验证码为6位数字', 'warn');
+    return;
   }
   if (!validatePassword(form.value.password)) {
-    showMessage('密码需6-20位且包含字母和数字', 'warn')
-    return
+    showMessage('密码需6-20位且包含字母和数字', 'warn');
+    return;
   }
   if (form.value.password !== form.value.password2) {
-    showMessage('两次密码输入不一致', 'warn')
-    return
+    showMessage('两次输入的密码不一致', 'warn');
+    return;
   }
-  loading.value = true
+  
+  loading.value = true;
   try {
-    const res = await register({
+    await register({
       account: form.value.account,
-      passwd: form.value.password,
       email: form.value.email,
-      emailCode: form.value.emailCode
-    })
-    if (res.code === 200) {
-      showMessage('注册成功', 'success')
-      setTimeout(() => router.push('/user/login'), 800)
-    } else {
-      showMessage(res.msg || '注册失败', 'error')
-    }
-  } catch (e) {
-    showMessage(e.message || '注册失败', 'error')
+      emailCode: form.value.emailCode,
+      passwd: form.value.password,
+    });
+    showMessage('注册成功，请登录', 'success');
+    router.push('/user/login');
+  } catch (error) {
+    showMessage(error.message || '注册失败', 'error');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
+
+// 使用防抖包装注册处理函数
+const onRegister = debounce(handleRegister, 500, true);
+
+// 组件卸载时取消防抖函数
+onUnmounted(() => {
+  onRegister.cancel?.();
+  sendCode.cancel?.();
+});
 </script>
 
 <style scoped>
-/* Styles are now handled by Tailwind CSS classes */
+/* 按钮禁用状态样式 */
+button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* 输入框聚焦样式 */
+input:focus {
+  @apply ring-2 ring-blue-500 border-transparent;
+}
+
+/* 加载动画 */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
 </style>
