@@ -825,7 +825,7 @@ async function removeGroupHandler(group) {
       ? JSON.parse(localStorage.getItem("user"))
       : null;
     const token = user?.token || "";
-    
+    console.log(group.id)
     const res = await deleteGroup(group.id, token);
     if (res.code !== 200) {
       showMessage(res.msg || "删除失败", "error");

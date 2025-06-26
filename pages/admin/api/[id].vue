@@ -684,7 +684,7 @@
       :groups="groupOptions"
       :new-group-name="newGroupName"
       :error="groupError"
-      @update:new-group-name="val => newGroupName = val"
+      @update:new-group-name="(val) => (newGroupName = val)"
       @add="handleAddGroup"
       @delete="handleDeleteGroup"
     />
@@ -698,7 +698,7 @@
 </template>
 
 <script setup>
-import GroupManagementModal from '~/components/admin/GroupManagementModal.vue';
+import GroupManagementModal from "~/components/admin/GroupManagementModal.vue";
 
 definePageMeta({
   layout: "admin",
@@ -798,16 +798,15 @@ async function handleAddGroup() {
 }
 
 // 删除分组
-async function handleDeleteGroup(name) {
+async function handleDeleteGroup(group) {
   groupError.value = "";
-  if (!confirm(`确定删除分组“${name}”？`)) return;
+  if (!confirm(`确定删除分组“${group.title}”？`)) return;
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
   const token = user?.token || "";
   try {
-    // 需后端支持按 name 或 id 删除，这里假设 name
-    const res = await deleteGroup(name, token);
+    const res = await deleteGroup(group.id, token);
     if (res.code === 200) {
       await fetchGroups();
     } else {
@@ -1065,11 +1064,12 @@ async function submitEdit() {
 }
 @media (max-width: 768px) {
   /* Base container and spacing */
-  html, body {
+  html,
+  body {
     width: 100%;
     overflow-x: hidden;
   }
-  
+
   .mx-auto {
     width: 100%;
     max-width: 100%;
@@ -1084,14 +1084,14 @@ async function submitEdit() {
     gap: 0.75rem;
     margin-bottom: 1.25rem;
   }
-  
+
   .form-row label {
     width: 100%;
     padding: 0;
     margin-bottom: 0.25rem;
     font-size: 0.95rem;
   }
-  
+
   .form-row input,
   .form-row select,
   .form-row textarea {
@@ -1125,14 +1125,14 @@ async function submitEdit() {
     padding: 1.25rem 1rem;
     box-sizing: border-box;
   }
-  
+
   .modal-group-item {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
     padding: 0.75rem 0;
   }
-  
+
   .modal-group-item button {
     align-self: flex-start;
     margin-top: 0.5rem;
@@ -1144,7 +1144,7 @@ async function submitEdit() {
     gap: 0.75rem;
     margin-top: 1.5rem;
   }
-  
+
   .form-actions button {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -1233,7 +1233,8 @@ async function submitEdit() {
   }
 
   /* Make sure all buttons are touch-friendly */
-  button, [role="button"] {
+  button,
+  [role="button"] {
     min-width: 44px;
     min-height: 44px;
   }

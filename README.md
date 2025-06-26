@@ -206,16 +206,33 @@ pnpm preview
 感谢所有为项目做出贡献的开发者！
 
 <div align="center">
-  <a href="https://github.com/937bb" target="_blank">
-    <img src="https://blog.937b.cn/images/logo.jpg" width="120" height="120" alt="937bb" style="border-radius: 50%;">
-    <br>
-    <strong>937bb</strong>
-    <br>
-    <small>项目维护者</small>
-  </a>
+  <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin: 2rem 0;">
+    <div style="text-align: center;">
+      <a href="https://github.com/937bb" target="_blank" style="text-decoration: none; color: inherit;">
+        <img 
+          src="https://blog.937b.cn/images/logo.jpg" 
+          width="120" 
+          height="120" 
+          alt="937bb" 
+          style="a
+            border-radius: 50%; 
+            border: 3px solid #e2e8f0;
+            transition: transform 0.3s ease;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          "
+          onmouseover="this.style.transform='scale(1.05)'"
+          onmouseout="this.style.transform='scale(1)'"
+        >
+        <div style="font-size: 1.1rem; font-weight: 600; color: #2d3748;">937bb</div>
+        <div style="color: #718096; margin-top: 0.25rem;">项目维护者</div>
+      </a>
+    </div>
+  </div>
   
-  <p>
-    想要成为贡献者？请阅读我们的 <a href="#-贡献指南">贡献指南</a>
+  <p style="margin-top: 1.5rem; color: #4a5568;">
+    想要成为贡献者？请阅读我们的 
+    <a href="#-贡献指南" style="color: #4299e1; text-decoration: none; font-weight: 500;">贡献指南</a>
   </p>
 </div>
 
