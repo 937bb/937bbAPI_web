@@ -207,7 +207,7 @@ pnpm preview
 
 <div align="center">
   <a href="https://github.com/937bb" target="_blank">
-    <img src="https://avatars.githubusercontent.com/u/937bb" width="100" height="100" alt="937bb" style="border-radius: 50%; border: 3px solid #e2e8f0;">
+    <img src="https://avatars.githubusercontent.com/u/937bb?s=200" width="100" height="100" alt="937bb" style="border-radius: 50%; border: 3px solid #e2e8f0;">
     <br>
     <strong>937bb</strong>
     <br>
