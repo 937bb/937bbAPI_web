@@ -207,15 +207,17 @@ pnpm preview
 
 <div align="center">
   <a href="https://github.com/937bb" target="_blank">
-    <img src="https://blog.937b.cn/images/logo.jpg" width="100" height="100" alt="937bb" style="border-radius: 50%; border: 3px solid #e2e8f0;">
+    <img src="https://blog.937b.cn/images/logo.jpg" width="120" height="120" alt="937bb" style="border-radius: 50%;">
     <br>
     <strong>937bb</strong>
     <br>
     <small>项目维护者</small>
   </a>
+  
+  <p>
+    想要成为贡献者？请阅读我们的 <a href="#-贡献指南">贡献指南</a>
+  </p>
 </div>
-
-想要成为贡献者？请阅读我们的 [贡献指南](#-贡献指南)
 
 <div style="margin: 3rem 0; padding: 2rem; background-color: #f8f9fa; border-radius: 0.5rem;">
   <h2 style="color: #2d3748; margin-top: 0; margin-bottom: 1.5rem; text-align: center;">🔗 相关项目</h2>
