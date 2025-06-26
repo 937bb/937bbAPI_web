@@ -105,7 +105,7 @@
 								<dl>
 									<dt class="text-sm font-medium text-gray-500 truncate">今日请求数</dt>
 									<dd class="flex items-baseline">
-										<div class="text-2xl font-semibold text-gray-900">{{ stats.todayRequests || 0 }}</div>
+										<div class="text-2xl font-semibold text-gray-900">{{ stats.requestCountTody || 0 }}</div>
 									</dd>
 								</dl>
 							</div>
