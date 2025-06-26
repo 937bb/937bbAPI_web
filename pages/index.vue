@@ -152,6 +152,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useGlobalConfig } from '~/utils/globalConfig';
 import { useRouter } from 'vue-router';
 import { getApiList, getGroupList } from '~/utils/api';
+import storage from '~/utils/storage';
 
 const { siteName } = useGlobalConfig();
 const router = useRouter();
@@ -217,8 +218,8 @@ const activeGroup = ref("");
 
 // 组件挂载时获取数据
 onMounted(() => {
-  // 从本地存储获取token
-  token.value = localStorage.getItem('token') || '';
+    // 从 storage 获取 token
+  token.value = storage.getToken();
   fetchApis();
 });
 

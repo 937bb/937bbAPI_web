@@ -287,6 +287,7 @@ definePageMeta({
 import { ref, reactive, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import MessageModal from "~/components/MessageModal.vue";
+import storage from '~/utils/storage';
 import {
   getUserDetail as fetchUserDetailApi,
   updateUser as updateUserApi,
@@ -350,13 +351,11 @@ async function fetchUserDetails() {
   error.value = null;
 
   try {
-    // Get token from localStorage
-    const user = localStorage.getItem("user")
-      ? JSON.parse(localStorage.getItem("user"))
-      : null;
+    // 从 storage 获取用户 token
+    const user = storage.getItem("user") || {};
     const token = user?.token || "";
     if (!token) {
-      console.error("No token found in localStorage");
+      console.error("No token found in storage");
       throw new Error("用户未登录或登录已过期");
     }
 
@@ -442,8 +441,8 @@ async function submitEdit() {
   saving.value = true;
 
   try {
-    // Get token from localStorage
-    const token = localStorage.getItem("token") || "";
+    // 从 storage 获取 token
+    const token = storage.getToken();
 
     // Prepare user data according to API requirements
     const userData = {

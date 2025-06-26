@@ -7,19 +7,20 @@
  */
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import storage from '~/utils/storage';
 
 // Create a shared state outside the composable
 const userState = ref(null);
 
-// Load user from localStorage on module load
+// 初始化时从存储加载用户数据
 if (process.client) {
-  const userData = localStorage.getItem('user');
+  const userData = storage.getItem('user');
   if (userData) {
     try {
-      userState.value = JSON.parse(userData);
+      userState.value = userData;
     } catch (e) {
       console.error('Failed to parse user data:', e);
-      localStorage.removeItem('user');
+      storage.removeItem('user');
     }
   }
 }
@@ -42,12 +43,12 @@ export function useUser() {
     return userData;
   };
 
-  // Logout function
+  // 用户登出
   const logout = () => {
     userState.value = null;
     if (process.client) {
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
+      storage.removeItem('user');
+      storage.removeToken();
     }
     router.push('/user/login');
   };

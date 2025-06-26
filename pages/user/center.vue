@@ -194,7 +194,7 @@ const showApiKey = ref(false)
 const showToast = ref(false)
 const toastTimeout = ref(null)
 
-// Toggle API key visibility
+// 切换API密钥可见性
 const toggleApiKeyVisibility = () => {
   showApiKey.value = !showApiKey.value
 }
@@ -202,7 +202,7 @@ const toggleApiKeyVisibility = () => {
 function copyKey() {
   if (!user.value?.key || !showApiKey.value) return;
   
-  // Try using the modern clipboard API first
+  // 首先尝试使用现代剪贴板API
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(user.value.key).then(() => {
       copyTip.value = true;
@@ -218,7 +218,7 @@ function copyKey() {
   }
 }
 
-// Fallback method for older browsers
+// 旧版浏览器的回退方法
 function fallbackCopyText(text) {
   const textarea = document.createElement('textarea');
   textarea.value = text;

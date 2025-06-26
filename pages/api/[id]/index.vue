@@ -321,7 +321,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { getApiDetail, getGroupList } from "~/utils/api";
-
+import storage from '~/utils/storage';
 import { useGlobalConfig } from "~/utils/globalConfig";
 const { apiBase } = useGlobalConfig();
 
@@ -350,7 +350,7 @@ const api = ref({
   groupId: "",
 });
 
-// Get method badge class
+// 获取方法徽章类名
 const getMethodBadgeClass = (method) => {
   const classes = {
     GET: "bg-green-100 text-green-800",
@@ -363,7 +363,7 @@ const getMethodBadgeClass = (method) => {
   return classes[method] || classes.default;
 };
 
-// Get status badge class
+// 获取状态徽章类名
 const getStatusBadgeClass = (status) => {
   const classes = {
     active:
@@ -378,7 +378,7 @@ const getStatusBadgeClass = (status) => {
   return classes[status] || classes.default;
 };
 
-// Get status display text
+// 获取状态显示文本
 const getStatusText = (status) => {
   const statusMap = {
     0: '已停用',
@@ -388,7 +388,7 @@ const getStatusText = (status) => {
   return statusMap[status] || '未知状态';
 };
 
-// Get parameter type display text
+// 获取参数类型显示文本
 const getParamTypeText = (type) => {
   const typeMap = {
     'string': '字符串',
@@ -402,7 +402,7 @@ const getParamTypeText = (type) => {
   return typeMap[type.toLowerCase()] || type || '字符串';
 };
 
-// Get parameter type badge class
+// 获取参数类型徽章类名
 const getParamTypeClass = (type) => {
   const typeLower = (type || 'string').toLowerCase();
   const classMap = {
@@ -417,10 +417,10 @@ const getParamTypeClass = (type) => {
   return classMap[typeLower] || 'bg-gray-100 text-gray-800';
 };
 
-// Load group list
+// 加载分组列表
 const loadGroups = async () => {
   try {
-    const token = localStorage.getItem("token") || "";
+    const token = storage.getToken();
     const response = await getGroupList(token);
     if (response && response.code === 200 && Array.isArray(response.data)) {
       groups.value = response.data;
@@ -430,24 +430,24 @@ const loadGroups = async () => {
   }
 };
 
-// Get group name by ID
+// 通过ID获取分组名称
 const getGroupName = (groupId) => {
   if (!groupId) return "未分组";
   const group = groups.value.find((g) => g.id === groupId);
   return group ? group.title : "未知分组";
 };
 
-// Copy URL to clipboard
+// 复制URL到剪贴板
 const showNotification = (success = true) => {
-  // Clear any existing timeout
+  // 清除现有的超时
   if (toastTimeout.value) {
     clearTimeout(toastTimeout.value);
   }
   
-  // Show toast
+  // 显示提示
   showToast.value = true;
   
-  // Hide toast after 3 seconds
+  // 3秒后隐藏提示
   toastTimeout.value = setTimeout(() => {
     showToast.value = false;
     toastTimeout.value = null;
@@ -455,21 +455,21 @@ const showNotification = (success = true) => {
 };
 
 const copyToClipboard = (path) => {
-  // Prepend base URL if the path is relative
+  // 如果是相对路径，添加基础URL
   const fullUrl = path.startsWith("http")
     ? path
     : `${apiBase}/${path.startsWith("/") ? path.substring(1) : path}`;
 
-  // Create a temporary textarea element
+  // 创建临时textarea元素
   const textarea = document.createElement("textarea");
   textarea.value = fullUrl;
-  textarea.style.position = "fixed"; // Avoid scrolling to bottom
+  textarea.style.position = "fixed"; // 避免滚动到底部
   document.body.appendChild(textarea);
   textarea.focus();
   textarea.select();
 
   try {
-    // Execute the copy command
+    // 执行复制命令
     const successful = document.execCommand("copy");
     if (successful) {
       isCopied.value = true;
@@ -485,7 +485,7 @@ const copyToClipboard = (path) => {
     }
   } catch (err) {
     console.error("Failed to copy:", err);
-    // Fallback to modern clipboard API if execCommand fails
+    // 如果execCommand失败，回退到现代剪贴板API
     try {
       navigator.clipboard.writeText(fullUrl).then(() => {
         isCopied.value = true;
@@ -504,21 +504,21 @@ const copyToClipboard = (path) => {
       showNotification(false);
     }
   } finally {
-    // Clean up
+    // 清理
     document.body.removeChild(textarea);
   }
 };
 
-// Load API details
+// 加载API详情
 const loadApi = async () => {
   try {
     loading.value = true;
     const apiId = route.params.id;
 
     try {
-      // Get token from localStorage or wherever it's stored
-      const token = localStorage.getItem("token") || "";
-      await loadGroups(); // Load groups first
+      // 从存储中获取token
+      const token = storage.getToken();
+      await loadGroups(); // 先加载分组
       const response = await getApiDetail(apiId, token);
       if (response && response.code === 200 && response.data) {
         api.value = {
@@ -548,7 +548,7 @@ const loadApi = async () => {
       console.error("Error fetching API details:", apiError);
       error.value = "加载API详情失败: " + (apiError.message || "未知错误");
       if (process.dev) {
-        // Fallback mock data in development
+        // 开发环境回退的模拟数据
         api.value = {
           id: "mock-id",
           title: "示例API",
@@ -585,7 +585,7 @@ const loadApi = async () => {
   }
 };
 
-// Initialize
+// 初始化
 onMounted(() => {
   loadApi();
 });

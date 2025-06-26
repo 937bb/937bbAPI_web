@@ -266,6 +266,7 @@ definePageMeta({
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getTodayStatistics } from "~/utils/api";
+import storage from '~/utils/storage';
 
 const router = useRouter();
 const loading = ref(false);
@@ -304,8 +305,8 @@ const fetchDashboardData = async () => {
 	try {
 		loading.value = true;
 
-		// Get user token from localStorage
-		const user = JSON.parse(localStorage.getItem("user") || "{}");
+		// 从 storage 获取用户 token
+		const user = storage.getItem("user") || {};
 		const token = user?.token;
 
 		// Fetch today's statistics
