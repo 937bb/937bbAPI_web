@@ -1,8 +1,14 @@
+/*
+ * @Author: 937bb
+ * @email: 3535025404@qq.com
+ * @Date: 2025-06-23 08:44:15
+ * @LastEditors: 937bb
+ * @LastEditTime: 2025-06-26 14:57:56
+ */
 // 封装通用请求方法，自动拼接 baseUrl，支持 get/post
 // 通过环境变量获取 baseUrl，兼容 Nuxt3/前端
-import {useGlobalConfig} from "~/utils/globalConfig";
 
-const baseUrl = import.meta.env.VITE_API_BASE || process.env.VITE_API_BASE || ''
+const baseUrl = import.meta.env.VITE_BASE_URL || process.env.VITE_BASE_URL || ''
 export async function $apiFetch(path, options = {}) {
   // 支持 path 以 / 开头
   const url = path.startsWith('http') ? path : baseUrl + path
