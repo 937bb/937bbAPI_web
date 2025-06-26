@@ -1,83 +1,41 @@
-<div align="center" class="header">
-  <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: #1a365d;">📡 937bbAPI 导航站</h1>
-  <p style="font-size: 1.25rem; color: #4a5568; margin-bottom: 2rem;">最全、最易用的免费API接口导航站</p>
-  <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;">
-    <img src="https://img.shields.io/badge/Nuxt-3.0.0-00DC82?style=for-the-badge&logo=nuxt.js" alt="Nuxt 3">
-    <img src="https://img.shields.io/badge/Vue-3.3.0-4FC08D?style=for-the-badge&logo=vue.js" alt="Vue 3">
-    <img src="https://img.shields.io/badge/Tailwind_CSS-3.4.0-06B6D4?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS">
-    <img src="https://img.shields.io/badge/TypeScript-5.0.0-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript">
-  </div>
+<div align="center">
+  <h1>📡 937bbAPI 导航站</h1>
+  <p>最全、最易用的免费API接口导航站</p>
+  
+  <img src="https://img.shields.io/badge/Nuxt-3.0.0-00DC82?style=flat-square&logo=nuxt.js" alt="Nuxt 3">
+  <img src="https://img.shields.io/badge/Vue-3.3.0-4FC08D?style=flat-square&logo=vue.js" alt="Vue 3">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.4.0-06B6D4?style=flat-square&logo=tailwind-css" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/TypeScript-5.0.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
 </div>
 
-<div style="background: #f8fafc; padding: 2rem; border-radius: 0.5rem; margin: 2rem 0;">
-  <h2 style="color: #2d3748; margin-top: 0;">🌟 项目介绍</h2>
-  <p style="color: #4a5568; line-height: 1.6; margin-bottom: 0;">937bbAPI 是一个现代化的API接口导航网站，旨在为开发者提供便捷的API搜索和使用体验。项目采用前沿的前端技术栈构建，具有响应式设计，支持PC和移动端访问。</p>
-</div>
+## 🌟 项目介绍
 
-<div style="margin: 2rem 0;">
-  <h2 style="color: #2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; display: inline-block;">✨ 功能特性</h2>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-    <div style="background: white; padding: 1.25rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <h3 style="color: #2b6cb0; margin-top: 0;">🔍 强大的API搜索</h3>
-      <p style="color: #4a5568; margin-bottom: 0;">快速找到您需要的API接口</p>
-    </div>
-    <div style="background: white; padding: 1.25rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <h3 style="color: #2b6cb0; margin-top: 0;">📱 响应式设计</h3>
-      <p style="color: #4a5568; margin-bottom: 0;">完美适配各种设备尺寸</p>
-    </div>
-    <div style="background: white; padding: 1.25rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <h3 style="color: #2b6cb0; margin-top: 0;">🎨 现代化UI</h3>
-      <p style="color: #4a5568; margin-bottom: 0;">简洁美观的用户界面</p>
-    </div>
-    <div style="background: white; padding: 1.25rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <h3 style="color: #2b6cb0; margin-top: 0;">⚡ 极速加载</h3>
-      <p style="color: #4a5568; margin-bottom: 0;">基于Nuxt 3的快速渲染</p>
-    </div>
-    <div style="background: white; padding: 1.25rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <h3 style="color: #2b6cb0; margin-top: 0;">🔍 实时监控</h3>
-      <p style="color: #4a5568; margin-bottom: 0;">API状态实时监控</p>
-    </div>
-    <div style="background: white; padding: 1.25rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <h3 style="color: #2b6cb0; margin-top: 0;">📊 使用统计</h3>
-      <p style="color: #4a5568; margin-bottom: 0;">详细的API调用统计</p>
-    </div>
-  </div>
-</div>
+937bbAPI 是一个现代化的API接口导航网站，旨在为开发者提供便捷的API搜索和使用体验。项目采用前沿的前端技术栈构建，具有响应式设计，支持PC和移动端访问。
 
-<div style="background: #f0f9ff; padding: 2rem; border-radius: 0.5rem; margin: 2rem 0;">
-  <h2 style="color: #0369a1; margin-top: 0;">🛠️ 技术栈</h2>
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-    <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-      <strong>前端框架</strong>
-      <p style="margin: 0.5rem 0 0 0; color: #4b5563;">Nuxt 3 + Vue 3</p>
-    </div>
-    <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-      <strong>UI组件</strong>
-      <p style="margin: 0.5rem 0 0 0; color: #4b5563;">Headless UI + Heroicons</p>
-    </div>
-    <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-      <strong>样式</strong>
-      <p style="margin: 0.5rem 0 0 0; color: #4b5563;">Tailwind CSS 3</p>
-    </div>
-    <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-      <strong>构建工具</strong>
-      <p style="margin: 0.5rem 0 0 0; color: #4b5563;">Vite</p>
-    </div>
-    <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-      <strong>编程语言</strong>
-      <p style="margin: 0.5rem 0 0 0; color: #4b5563;">TypeScript</p>
-    </div>
-    <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-      <strong>代码规范</strong>
-      <p style="margin: 0.5rem 0 0 0; color: #4b5563;">ESLint + Prettier</p>
-    </div>
-  </div>
-</div>
+## ✨ 功能特性
 
-<div style="margin: 3rem 0 2rem 0; position: relative;">
-  <div style="width: 100%; height: 1px; background: linear-gradient(90deg, transparent, #64748b, transparent); position: absolute; top: 50%;"></div>
-  <h2 style="display: inline-block; background: white; padding: 0 1.5rem; position: relative; margin: 0 auto; font-size: 1.5rem; color: #1e40af;">🚀 快速开始</h2>
-</div>
+- 🔍 **强大的API搜索**：快速找到您需要的API接口
+- 📱 **响应式设计**：完美适配各种设备尺寸
+- 🎨 **现代化UI**：简洁美观的用户界面
+- ⚡ **极速加载**：基于Nuxt 3的快速渲染
+- 🔄 **实时监控**：API状态实时监控
+- 📊 **使用统计**：详细的API调用统计
+- 🔒 **用户认证**：安全的用户认证与授权
+- 🌍 **多语言支持**：国际化支持（开发中）
+
+## 🛠️ 技术栈
+
+- **前端框架**: Nuxt 3 + Vue 3
+- **UI组件**: Headless UI + Heroicons
+- **样式**: Tailwind CSS 3
+- **构建工具**: Vite
+- **编程语言**: TypeScript
+- **代码规范**: ESLint + Prettier
+- **版本控制**: Git
+
+---
+
+## 🚀 快速开始
 
 ### 环境要求
 
@@ -108,25 +66,50 @@ pnpm build
 pnpm preview
 ```
 
-<div style="margin: 2.5rem 0;">
-  <h2 style="color: #2d3748; margin-bottom: 1rem;">📁 项目结构</h2>
-  <div style="background: #1a202c; color: #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 0.9rem; line-height: 1.6; overflow-x: auto;">
-    <div><span style="color: #63b3ed;">937bbAPI_web/</span></div>
-    <div style="margin-left: 1rem;">
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">assets/</span>             <span style="color: #a0aec0;"># 静态资源</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">components/</span>         <span style="color: #a0aec0;"># 公共组件</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">composables/</span>        <span style="color: #a0aec0;"># 组合式函数</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">layouts/</span>            <span style="color: #a0aec0;"># 布局组件</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">pages/</span>              <span style="color: #a0aec0;"># 页面组件</span></div>
-      <div style="margin-left: 1rem;">
-        <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">admin/</span>         <span style="color: #a0aec0;"># 管理后台页面</span></div>
-        <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">api/</span>           <span style="color: #a0aec0;"># API相关页面</span></div>
-        <div><span style="color: #63b3ed;">└──</span> <span style="color: #68d391;">user/</span>          <span style="color: #a0aec0;"># 用户相关页面</span></div>
-      </div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">plugins/</span>            <span style="color: #a0aec0;"># 插件</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">public/</span>             <span style="color: #a0aec0;"># 公共文件</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">server/</span>             <span style="color: #a0aec0;"># 服务端代码</span></div>
-      <div><span style="color: #63b3ed;">├──</span> <span style="color: #68d391;">utils/</span>              <span style="color: #a0aec0;"># 工具函数</span></div>
+## 📁 项目结构
+
+```
+├── .nuxt/                  # Nuxt 自动生成的文件
+├── .output/               # 构建输出目录
+├── .vscode/               # VS Code 配置
+├── assets/                # 静态资源
+│   ├── css/               # 全局样式
+│   └── images/            # 图片资源
+├── components/            # 公共组件
+│   ├── layout/            # 布局组件
+│   ├── ui/                # UI 基础组件
+│   └── icons/             # 图标组件
+├── composables/           # 组合式函数
+├── content/               # 内容文件（如 Markdown）
+├── layouts/               # 布局文件
+│   └── default.vue        # 默认布局
+├── middleware/            # 中间件
+├── node_modules/          # 项目依赖
+├── pages/                 # 页面组件
+│   ├── api/               # API 相关页面
+│   ├── index.vue          # 首页
+│   └── [...slug].vue      # 动态路由
+├── plugins/               # 插件
+├── public/                # 静态文件（直接复制到根目录）
+├── server/                # 服务端代码
+│   ├── api/               # API 路由
+│   └── middleware/        # 服务端中间件
+├── static/                # 静态资源（直接映射到根路径）
+├── stores/                # 状态管理
+├── types/                 # TypeScript 类型定义
+├── utils/                 # 工具函数
+├── .editorconfig          # 编辑器配置
+├── .env.development       # 开发环境变量
+├── .env.production        # 生产环境变量
+├── .eslintrc.js           # ESLint 配置
+├── .gitignore             # Git 忽略文件
+├── app.vue                # 应用入口
+├── nuxt.config.ts         # Nuxt 配置文件
+├── package.json           # 项目配置
+├── pnpm-lock.yaml         # 依赖版本锁文件
+├── README.md              # 项目说明
+└── tsconfig.json          # TypeScript 配置
+```
       <div><span style="color: #63b3ed;">├──</span> <span style="color: #f6ad55;">app.vue</span>             <span style="color: #a0aec0;"># 应用入口</span></div>
       <div><span style="color: #63b3ed;">├──</span> <span style="color: #f6ad55;">nuxt.config.ts</span>      <span style="color: #a0aec0;"># Nuxt配置</span></div>
       <div><span style="color: #63b3ed;">└──</span> <span style="color: #f6ad55;">tailwind.config.js</span>  <span style="color: #a0aec0;"># Tailwind配置</span></div>
@@ -293,15 +276,21 @@ pnpm preview
 
 ## 🙏 致谢
 
-- [Nuxt 3](https://nuxt.com/)
-- [Vue 3](https://vuejs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Headless UI](https://headlessui.com/)
-- [Heroicons](https://heroicons.com/)
+*   [Nuxt 3](https://nuxt.com/) - 直观的 Vue 框架
+*   [Vue 3](https://v3.vuejs.org/) - 渐进式 JavaScript 框架
+*   [Tailwind CSS](https://tailwindcss.com/) - 实用优先的 CSS 框架
+*   [Vite](https://vitejs.dev/) - 下一代前端工具链
+*   [TypeScript](https://www.typescriptlang.org/) - JavaScript with syntax for types
+
+## 📊 项目统计
+
+[![GitHub stars](https://img.shields.io/github/stars/937bb/937bbAPI_web?style=for-the-badge)](https://github.com/937bb/937bbAPI_web/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/937bb/937bbAPI_web?style=for-the-badge)](https://github.com/937bb/937bbAPI_web/network/members)
+[![GitHub watchers](https://img.shields.io/github/watchers/937bb/937bbAPI_web?style=for-the-badge)](https://github.com/937bb/937bbAPI_web/watchers)
+[![License](https://img.shields.io/github/license/937bb/937bbAPI_web?style=for-the-badge)](https://github.com/937bb/937bbAPI_web/blob/main/LICENSE)
 
 ---
 
-<div align="center">
-  <p>Made with ❤️ by 937bb</p>
-  <p>© 2025 937bbAPI. All rights reserved.</p>
-</div>
+Made with ❤️ by 937bb
+
+© 2025 937bbAPI. All rights reserved.
