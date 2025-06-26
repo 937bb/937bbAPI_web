@@ -1,15 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 加载状态 -->
-    <div v-if="isLoading" class="flex items-center justify-center min-h-[50vh]">
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-        <p class="mt-4 text-gray-600">加载中，请稍候...</p>
-      </div>
-    </div>
-
     <!-- 错误提示 -->
-    <div v-else-if="error" class="bg-red-50 border-l-4 border-red-500 p-4 my-4">
+    <div v-if="error" class="bg-red-50 border-l-4 border-red-500 p-4 my-4">
       <div class="flex">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -152,10 +144,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useGlobalConfig } from '~/utils/globalConfig';
 import { useRouter } from 'vue-router';
 import { getApiList, getGroupList } from '~/utils/api';
-import storage from '~/utils/storage';
+import { useLoading } from '~/composables/useLoading';
+import { useMessage } from '~/composables/useMessage';
 
 const { siteName } = useGlobalConfig();
 const router = useRouter();
+const { startLoading, finishLoading } = useLoading();
+const { error: showError } = useMessage();
 const token = ref(''); // 从本地存储获取token
 
 const goDetail = (id) => {
@@ -165,13 +160,18 @@ const goDetail = (id) => {
 const searchText = ref("");
 const apis = ref([]);
 const groups = ref([]);
-const isLoading = ref(true);
 const error = ref(null);
 
 // 获取API列表
 const fetchApis = async () => {
+  // 使用全局 loading 状态
+  const { startLoading, finishLoading } = useLoading();
+  const { error: showError } = useMessage();
+  
   try {
-    isLoading.value = true;
+    startLoading('正在加载API列表...');
+    
+    // 确保 error 被正确重置
     error.value = null;
     
     // 获取API列表和分组列表
@@ -197,9 +197,11 @@ const fetchApis = async () => {
     
   } catch (err) {
     console.error('获取数据失败:', err);
-    error.value = err.message || '获取数据失败，请稍后重试';
+    const errorMessage = err.message || '获取数据失败，请稍后重试';
+    error.value = errorMessage;
+    showError(errorMessage);
   } finally {
-    isLoading.value = false;
+    finishLoading();
   }
 };
 

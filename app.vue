@@ -1,9 +1,23 @@
 <template>
   <ThemeProvider>
     <div class="min-h-screen flex flex-col bg-gray-50 text-gray-900 antialiased">
-      <NuxtLayout>
-        <NuxtPage />
-      </NuxtLayout>
+      <!-- Splash Screen -->
+      <SplashScreen 
+        v-if="showSplash" 
+        :loading-text="splashLoadingText"
+        :version="appVersion"
+        @loaded="onSplashLoaded"
+      />
+      
+      <!-- Main Content -->
+      <div :class="{ 'opacity-0': showSplash, 'opacity-100': !showSplash, 'transition-opacity duration-500': true }">
+        <NuxtLayout>
+          <NuxtPage />
+        </NuxtLayout>
+      </div>
+      
+      <GlobalLoading />
+      <GlobalMessage />
     </div>
   </ThemeProvider>
 </template>
@@ -12,7 +26,65 @@
 // 使用 Nuxt 3 的布局系统
 // 页面将自动使用 /layouts/default.vue 作为默认布局
 // 可以在页面中使用 definePageMeta 来覆盖默认布局
+import { onMounted, watch, ref, computed } from 'vue';
+import { useNuxtApp, useRuntimeConfig } from '#app';
 import ThemeProvider from '~/components/style/ThemeProvider.vue';
+import GlobalLoading from '~/components/GlobalLoading.vue';
+import GlobalMessage from '~/components/GlobalMessage.vue';
+import SplashScreen from '~/components/SplashScreen.vue';
+import { useLoading } from '~/composables/useLoading';
+
+// 获取运行时配置
+const config = useRuntimeConfig();
+
+// 应用信息
+const appName = config.public.VITE_APP_NAME || 'App';
+const appVersion = config.public.VITE_APP_VERSION || '1.0.0';
+const enableSplash = config.public.VITE_ENABLE_SPLASH_SCREEN === 'true';
+
+// 启动画面状态
+const showSplash = ref(enableSplash);
+const splashLoadingText = ref(`Welcome to ${appName}`);
+
+// 启动画面加载完成
+const onSplashLoaded = () => {
+  showSplash.value = false;
+  document.body.style.overflow = '';
+};
+
+// 如果禁用启动画面，立即显示主内容
+if (!enableSplash) {
+  showSplash.value = false;
+}
+
+// 初始化全局 loading 状态
+const loading = useLoading();
+const { isLoading, loadingText } = toRefs(loading);
+
+// 提供全局 loading 状态
+const nuxtApp = useNuxtApp();
+nuxtApp.provide('loading', loading);
+
+// 监听加载状态，添加/移除 body 类
+watch(isLoading, (newVal) => {
+  if (process.client) {
+    if (newVal) {
+      document.body.classList.add('loading-active');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('loading-active');
+      document.body.style.overflow = '';
+    }
+  }
+}, { immediate: true });
+
+// 组件卸载时确保移除类
+onBeforeUnmount(() => {
+  if (process.client) {
+    document.body.classList.remove('loading-active');
+    document.body.style.overflow = '';
+  }
+});
 </script>
 
 <style>
