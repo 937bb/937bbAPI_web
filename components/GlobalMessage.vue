@@ -67,17 +67,25 @@
 </template>
 
 <script setup>
+/**
+ * @description: 全局消息提示组件
+ * @author: 937bb Team
+ * @lastUpdate: 2025-06-27
+ */
+
 import { useMessage } from '~/composables/useMessage'
 
+// 使用消息钩子
 const { message } = useMessage()
 
+// 根据消息类型返回对应的样式类
 const messageClasses = computed(() => ({
-  'bg-green-500': message.type === 'success',
-  'bg-red-500': message.type === 'error',
-  'bg-yellow-500': message.type === 'warning',
-  'bg-blue-500': message.type === 'info',
-  'opacity-0 translate-y-[-20px]': !message.show,
-  'opacity-100 translate-y-0': message.show
+  'bg-green-500': message.type === 'success',  // 成功消息
+  'bg-red-500': message.type === 'error',      // 错误消息
+  'bg-yellow-500': message.type === 'warning', // 警告消息
+  'bg-blue-500': message.type === 'info',      // 提示消息
+  'opacity-0 translate-y-[-20px]': !message.show, // 隐藏状态
+  'opacity-100 translate-y-0': message.show      // 显示状态
 }))
 </script>
 

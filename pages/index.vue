@@ -4,8 +4,17 @@
     <div v-if="error" class="bg-red-50 border-l-4 border-red-500 p-4 my-4">
       <div class="flex">
         <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          <svg
+            class="h-5 w-5 text-red-500"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
           </svg>
         </div>
         <div class="ml-3">
@@ -20,7 +29,7 @@
       <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ siteName }}</h1>
         <p class="text-gray-600 mb-6">最全、最易用的免费API接口导航站</p>
-        
+
         <!-- 统计信息 -->
         <div class="flex flex-wrap gap-4 mb-6">
           <div class="bg-blue-50 px-4 py-3 rounded-lg">
@@ -29,15 +38,28 @@
           </div>
           <div class="bg-green-50 px-4 py-3 rounded-lg">
             <p class="text-sm text-gray-500">总调用次数</p>
-            <p class="text-2xl font-bold text-green-600">{{ totalRequestCount }}</p>
+            <p class="text-2xl font-bold text-green-600">
+              {{ totalRequestCount }}
+            </p>
           </div>
         </div>
 
         <!-- 搜索框 -->
         <div class="relative max-w-2xl mb-6">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <svg
+              class="h-5 w-5 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"
+              />
             </svg>
           </div>
           <input
@@ -54,9 +76,9 @@
             @click="activeGroup = ''"
             :class="[
               'px-4 py-2 text-sm font-medium rounded-full',
-              activeGroup === '' 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              activeGroup === ''
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
             ]"
           >
             全部
@@ -67,9 +89,9 @@
             @click="activeGroup = g.id"
             :class="[
               'px-4 py-2 text-sm font-medium rounded-full',
-              activeGroup === g.id 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              activeGroup === g.id
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
             ]"
           >
             {{ g.title }}
@@ -78,7 +100,10 @@
       </div>
 
       <!-- API列表 -->
-      <div v-if="filteredApis.length > 0" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        v-if="filteredApis.length > 0"
+        class="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+      >
         <div
           v-for="api in filteredApis"
           :key="api.id"
@@ -87,8 +112,10 @@
         >
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-medium text-gray-900 truncate">{{ api.title }}</h3>
-              <span 
+              <h3 class="text-lg font-medium text-gray-900 truncate">
+                {{ api.title }}
+              </h3>
+              <span
                 :class="[
                   'px-2 py-1 text-xs font-semibold rounded-full',
                   {
@@ -96,22 +123,44 @@
                     'bg-blue-100 text-blue-800': api.method === 'POST',
                     'bg-yellow-100 text-yellow-800': api.method === 'PUT',
                     'bg-red-100 text-red-800': api.method === 'DELETE',
-                    'bg-purple-100 text-purple-800': !['GET', 'POST', 'PUT', 'DELETE'].includes(api.method)
-                  }
+                    'bg-purple-100 text-purple-800': ![
+                      'GET',
+                      'POST',
+                      'PUT',
+                      'DELETE',
+                    ].includes(api.method),
+                  },
                 ]"
               >
                 {{ api.method }}
               </span>
             </div>
-            <p class="mt-2 text-sm text-gray-600 line-clamp-2">{{ api.summary || '暂无描述' }}</p>
+            <p class="mt-2 text-sm text-gray-600 line-clamp-2">
+              {{ api.summary || "暂无描述" }}
+            </p>
             <div class="mt-4 flex items-center justify-between">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {{ getGroupTitle(api.groupId) || '未分类' }}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+              >
+                {{ getGroupTitle(api.groupId) || "未分类" }}
               </span>
               <div class="flex items-center text-sm text-gray-500">
-                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" clip-rule="evenodd" />
-                  <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v4.586l2.293 2.293a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V6a1 1 0 011-1z" clip-rule="evenodd" />
+                <svg
+                  class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"
+                    clip-rule="evenodd"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 5a1 1 0 011 1v4.586l2.293 2.293a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V6a1 1 0 011-1z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
                 {{ api.requestCount || 0 }} 次调用
               </div>
@@ -122,10 +171,22 @@
 
       <!-- 无数据提示 -->
       <div v-else class="text-center py-12 bg-white rounded-lg shadow-sm">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1"
+            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
-        <h3 class="mt-2 text-lg font-medium text-gray-900">没有找到匹配的API</h3>
+        <h3 class="mt-2 text-lg font-medium text-gray-900">
+          没有找到匹配的API
+        </h3>
         <p class="mt-1 text-sm text-gray-500">
           尝试调整搜索关键词或选择其他分组
         </p>
@@ -135,77 +196,98 @@
 </template>
 
 <script setup>
+/**
+ * @description: 首页组件
+ * @author: 937bb Team
+ * @lastUpdate: 2025-06-27
+ */
+
 // 设置页面元数据，指定使用默认布局
 definePageMeta({
-  layout: 'default'
+  layout: "default",
 });
 
-import { ref, computed, onMounted } from 'vue';
-import { useGlobalConfig } from '~/utils/globalConfig';
-import { useRouter } from 'vue-router';
-import { getApiList, getGroupList } from '~/utils/api';
-import { useLoading } from '~/composables/useLoading';
-import { useMessage } from '~/composables/useMessage';
+import { ref, computed, onMounted } from "vue";
+import { useGlobalConfig } from "~/utils/globalConfig";
+import { useRouter } from "vue-router";
+import { getApiList, getGroupList } from "~/utils/api";
+import { useLoading } from "~/composables/useLoading";
+import { useMessage } from "~/composables/useMessage";
 
+// 网站名称
 const { siteName } = useGlobalConfig();
+// 路由实例
 const router = useRouter();
-const { startLoading, finishLoading } = useLoading();
-const { error: showError } = useMessage();
-const token = ref(''); // 从本地存储获取token
+// 用户认证token
+const token = ref("");
 
+/**
+ * 跳转到API详情页
+ * @param {string} id - API的唯一标识符
+ */
 const goDetail = (id) => {
-  router.push(`/api/${id}`);
+  navigateTo(`/api/${id}`);
 };
 
+// 搜索关键词
 const searchText = ref("");
+// API列表
 const apis = ref([]);
+// 分组列表
 const groups = ref([]);
+// 错误信息
 const error = ref(null);
 
-// 获取API列表
+/**
+ * 获取API列表数据
+ * 从服务器获取所有API及其分组信息
+ */
+// 在组件顶部，与其它组合式函数一起调用
+const { startLoading, finishLoading } = useLoading();
+const { error: showError } = useMessage();
+
 const fetchApis = async () => {
-  // 使用全局 loading 状态
-  const { startLoading, finishLoading } = useLoading();
-  const { error: showError } = useMessage();
-  
   try {
-    startLoading('正在加载API列表...');
-    
-    // 确保 error 被正确重置
+    startLoading("正在加载API列表...");
     error.value = null;
-    
+
     // 获取API列表和分组列表
     const [apiResponse, groupResponse] = await Promise.all([
       getApiList(token.value),
-      getGroupList(token.value)
+      getGroupList(token.value),
     ]);
-    
+
     // 处理API列表响应
-    if (apiResponse && apiResponse.code === 200) {
-      apis.value = Array.isArray(apiResponse.data.list) ? apiResponse.data.list : [];
+    if (apiResponse?.code === 200) {
+      apis.value = Array.isArray(apiResponse.data?.list)
+        ? apiResponse.data.list
+        : [];
     } else {
-      throw new Error(apiResponse?.message || '获取API列表失败');
+      throw new Error(apiResponse?.message || "获取API列表失败");
     }
-    
+
     // 处理分组列表响应
-    if (groupResponse && groupResponse.code === 200) {
-      groups.value = Array.isArray(groupResponse.data) ? groupResponse.data : [];
+    if (groupResponse?.code === 200) {
+      groups.value = Array.isArray(groupResponse.data)
+        ? groupResponse.data
+        : [];
     } else {
-      console.warn('获取分组列表失败:', groupResponse?.message);
+      console.warn("获取分组列表失败:", groupResponse?.message);
       groups.value = [];
     }
-    
   } catch (err) {
-    console.error('获取数据失败:', err);
-    const errorMessage = err.message || '获取数据失败，请稍后重试';
-    error.value = errorMessage;
-    showError(errorMessage);
+    console.error("获取数据失败:", err);
+    error.value = err.message || "获取数据失败，请稍后重试";
+    showError(error.value);
   } finally {
     finishLoading();
   }
 };
 
-// 组件挂载时获取数据
+/**
+ * 组件挂载生命周期钩子
+ * 初始化时获取API数据
+ */
 onMounted(() => {
   fetchApis();
 });
@@ -220,7 +302,7 @@ const activeGroup = ref("");
 
 // 组件挂载时获取数据
 onMounted(() => {
-    // 从 storage 获取 token
+  // 从 storage 获取 token
   token.value = storage.getToken();
   fetchApis();
 });
@@ -228,14 +310,14 @@ onMounted(() => {
 // 过滤API列表
 const filteredApis = computed(() => {
   if (error.value) return [];
-  
+
   let list = [...apis.value];
-  
+
   // 按分组过滤
   if (activeGroup.value) {
     list = list.filter((a) => a.groupId === activeGroup.value);
   }
-  
+
   // 搜索过滤
   if (searchText.value.trim()) {
     const kw = searchText.value.trim().toLowerCase();
@@ -249,7 +331,7 @@ const filteredApis = computed(() => {
         (api.groupId && api.groupId.toLowerCase().includes(kw))
     );
   }
-  
+
   return list;
 });
 const getGroupTitle = (id) => {
@@ -521,7 +603,7 @@ body {
     padding: 0 0 6px 0;
     background: #fff;
     border-bottom: 1.5px solid #e0e7ef;
-    box-shadow: 0 2px 8px 0 rgba(99,102,241,0.04);
+    box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.04);
     width: 100%;
     display: flex;
     justify-content: flex-start;
@@ -534,7 +616,7 @@ body {
     border: 1.5px solid #e0e7ef;
     background: #f8fafc;
     color: #222;
-    box-shadow: 0 1px 4px 0 rgba(99,102,241,0.04);
+    box-shadow: 0 1px 4px 0 rgba(99, 102, 241, 0.04);
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -568,7 +650,7 @@ body {
     box-sizing: border-box;
     padding: 16px 10px 12px 10px;
     border-radius: 14px;
-    box-shadow: 0 2px 8px 0 rgba(99,102,241,0.06);
+    box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.06);
     margin-bottom: 14px;
     gap: 6px;
     border: 1.5px solid #f1f5f9;
@@ -579,7 +661,7 @@ body {
     position: relative;
   }
   .api-card:not(:last-child)::after {
-    content: '';
+    content: "";
     display: block;
     position: absolute;
     left: 10px;

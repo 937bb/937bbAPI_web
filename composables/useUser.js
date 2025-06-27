@@ -1,25 +1,26 @@
-/*
- * @Author: 937bb
- * @email: 3535025404@qq.com
- * @Date: 2025-06-24 11:30:24
- * @LastEditors: 937bb
- * @LastEditTime: 2025-06-24 11:31:14
+/**
+ * @description: 用户状态管理组合式函数
+ * @author: 937bb Team
+ * @lastUpdate: 2025-06-27
  */
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import storage from '~/utils/storage';
 
-// Create a shared state outside the composable
+// 在组合式函数外部创建共享状态
 const userState = ref(null);
 
-// 初始化时从存储加载用户数据
+/**
+ * 初始化用户状态
+ * 从本地存储中加载已登录用户数据
+ */
 if (process.client) {
   const userData = storage.getItem('user');
   if (userData) {
     try {
       userState.value = userData;
     } catch (e) {
-      console.error('Failed to parse user data:', e);
+      console.error('解析用户数据失败:', e);
       storage.removeItem('user');
     }
   }
@@ -34,7 +35,11 @@ export function useUser() {
     set: (val) => { userState.value = val; }
   });
 
-  // Login function
+  /**
+   * 用户登录
+   * @param {Object} userData - 用户数据对象
+   * @returns {Object} 登录后的用户数据
+   */
   const login = (userData) => {
     userState.value = userData;
     if (process.client) {
@@ -53,17 +58,28 @@ export function useUser() {
     router.push('/user/login');
   };
 
-  // Check if user is authenticated
+  /**
+   * 检查用户是否已认证
+   * @returns {boolean} 是否已登录
+   */
   const isAuthenticated = computed(() => {
     return !!userState.value;
   });
 
-  // Check if user has specific role
+  /**
+   * 检查用户是否拥有指定角色
+   * @param {string} role - 要检查的角色名称
+   * @returns {boolean} 是否拥有该角色
+   */
   const hasRole = (role) => {
     return userState.value?.roles?.includes(role) || false;
   };
 
-  // Update user data
+  /**
+   * 更新用户数据
+   * @param {Object} newData - 新的用户数据
+   * @returns {Object} 更新后的用户数据
+   */
   const updateUser = (newData) => {
     if (!userState.value) return;
     userState.value = { ...userState.value, ...newData };

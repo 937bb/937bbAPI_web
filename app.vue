@@ -16,16 +16,25 @@
         </NuxtLayout>
       </div>
       
-      <GlobalLoading />
+      <!-- Global Loading - Only show when splash screen is not active -->
+      <GlobalLoading v-if="!showSplash" />
       <GlobalMessage />
     </div>
   </ThemeProvider>
 </template>
 
+
+
 <script setup>
-// 使用 Nuxt 3 的布局系统
-// 页面将自动使用 /layouts/default.vue 作为默认布局
-// 可以在页面中使用 definePageMeta 来覆盖默认布局
+/*
+ * @description: Nuxt 3 应用入口文件
+ * @author: 937bb Team
+ * @lastUpdate: 2025-06-27
+ */
+
+// 布局系统说明：
+// 1. 页面默认使用 /layouts/default.vue 作为布局
+// 2. 可以在页面中使用 definePageMeta 来覆盖默认布局
 import { onMounted, watch, ref, computed } from 'vue';
 import { useNuxtApp, useRuntimeConfig } from '#app';
 import ThemeProvider from '~/components/style/ThemeProvider.vue';
@@ -49,6 +58,9 @@ const splashLoadingText = ref(`Welcome to ${appName}`);
 // 启动画面加载完成
 const onSplashLoaded = () => {
   showSplash.value = false;
+  // Ensure global loading state is reset
+  const { finishLoading } = useLoading()
+  finishLoading()
   document.body.style.overflow = '';
 };
 
