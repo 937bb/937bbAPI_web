@@ -1,18 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Loading State -->
-    <div v-if="loading" class="flex items-center justify-center min-h-[50vh]">
-      <div class="text-center">
-        <div
-          class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"
-        ></div>
-        <p class="mt-4 text-gray-600">加载中，请稍候...</p>
-      </div>
-    </div>
+   
 
     <!-- Error State -->
     <div
-      v-else-if="error"
+      v-if="error"
       class="flex items-center justify-center min-h-[50vh]"
     >
       <div class="text-center">
@@ -190,9 +182,11 @@
                   {{ param.name }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
-                    :class="getParamTypeClass(param.type || 'string')">
-                    {{ getParamTypeText(param.type || 'string') }}
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    :class="getParamTypeClass(param.type || 'string')"
+                  >
+                    {{ getParamTypeText(param.type || "string") }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -321,12 +315,12 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { getApiDetail, getGroupList } from "~/utils/api";
-import storage from '~/utils/storage';
+import storage from "~/utils/storage";
 import { useGlobalConfig } from "~/utils/globalConfig";
+import { useLoading } from "~/composables/useLoading";
 const { apiBase } = useGlobalConfig();
 
 const route = useRoute();
-const loading = ref(true);
 const error = ref(null);
 const groups = ref([]);
 const isCopied = ref(false);
@@ -381,40 +375,40 @@ const getStatusBadgeClass = (status) => {
 // 获取状态显示文本
 const getStatusText = (status) => {
   const statusMap = {
-    0: '已停用',
-    1: '已上线',
-    2: '开发中',
+    0: "已停用",
+    1: "已上线",
+    2: "开发中",
   };
-  return statusMap[status] || '未知状态';
+  return statusMap[status] || "未知状态";
 };
 
 // 获取参数类型显示文本
 const getParamTypeText = (type) => {
   const typeMap = {
-    'string': '字符串',
-    'number': '数字',
-    'integer': '整数',
-    'boolean': '布尔值',
-    'array': '数组',
-    'object': '对象',
-    'file': '文件',
+    string: "字符串",
+    number: "数字",
+    integer: "整数",
+    boolean: "布尔值",
+    array: "数组",
+    object: "对象",
+    file: "文件",
   };
-  return typeMap[type.toLowerCase()] || type || '字符串';
+  return typeMap[type.toLowerCase()] || type || "字符串";
 };
 
 // 获取参数类型徽章类名
 const getParamTypeClass = (type) => {
-  const typeLower = (type || 'string').toLowerCase();
+  const typeLower = (type || "string").toLowerCase();
   const classMap = {
-    'string': 'bg-blue-100 text-blue-800',
-    'number': 'bg-purple-100 text-purple-800',
-    'integer': 'bg-indigo-100 text-indigo-800',
-    'boolean': 'bg-green-100 text-green-800',
-    'array': 'bg-yellow-100 text-yellow-800',
-    'object': 'bg-pink-100 text-pink-800',
-    'file': 'bg-gray-100 text-gray-800',
+    string: "bg-blue-100 text-blue-800",
+    number: "bg-purple-100 text-purple-800",
+    integer: "bg-indigo-100 text-indigo-800",
+    boolean: "bg-green-100 text-green-800",
+    array: "bg-yellow-100 text-yellow-800",
+    object: "bg-pink-100 text-pink-800",
+    file: "bg-gray-100 text-gray-800",
   };
-  return classMap[typeLower] || 'bg-gray-100 text-gray-800';
+  return classMap[typeLower] || "bg-gray-100 text-gray-800";
 };
 
 // 加载分组列表
@@ -443,10 +437,10 @@ const showNotification = (success = true) => {
   if (toastTimeout.value) {
     clearTimeout(toastTimeout.value);
   }
-  
+
   // 显示提示
   showToast.value = true;
-  
+
   // 3秒后隐藏提示
   toastTimeout.value = setTimeout(() => {
     showToast.value = false;
@@ -487,18 +481,21 @@ const copyToClipboard = (path) => {
     console.error("Failed to copy:", err);
     // 如果execCommand失败，回退到现代剪贴板API
     try {
-      navigator.clipboard.writeText(fullUrl).then(() => {
-        isCopied.value = true;
-        copyButtonText.value = "已复制!";
-        showNotification(true);
-        setTimeout(() => {
-          isCopied.value = false;
-          copyButtonText.value = "复制链接";
-        }, 2000);
-      }).catch(e => {
-        console.error("Clipboard API failed:", e);
-        showNotification(false);
-      });
+      navigator.clipboard
+        .writeText(fullUrl)
+        .then(() => {
+          isCopied.value = true;
+          copyButtonText.value = "已复制!";
+          showNotification(true);
+          setTimeout(() => {
+            isCopied.value = false;
+            copyButtonText.value = "复制链接";
+          }, 2000);
+        })
+        .catch((e) => {
+          console.error("Clipboard API failed:", e);
+          showNotification(false);
+        });
     } catch (e) {
       console.error("Both copy methods failed", e);
       showNotification(false);
@@ -512,9 +509,7 @@ const copyToClipboard = (path) => {
 // 加载API详情
 const loadApi = async () => {
   try {
-    loading.value = true;
     const apiId = route.params.id;
-
     try {
       // 从存储中获取token
       const token = storage.getToken();
@@ -578,10 +573,8 @@ const loadApi = async () => {
       }
     }
   } catch (err) {
-    console.error("Error loading API:", err);
     error.value = "加载API详情时出错";
   } finally {
-    loading.value = false;
   }
 };
 

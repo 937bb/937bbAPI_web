@@ -7,14 +7,9 @@
         <p class="mt-2 text-gray-600">管理您的账户信息和API凭证</p>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-        <p class="mt-4 text-gray-600">加载用户信息中...</p>
-      </div>
 
       <!-- Main Content -->
-      <div v-else-if="user" class="bg-white shadow rounded-lg overflow-hidden">
+      <div v-if="user" class="bg-white shadow rounded-lg overflow-hidden">
         <!-- User Profile Section -->
         <div class="px-6 py-5 border-b border-gray-200">
           <div class="flex items-center justify-between">
@@ -188,7 +183,6 @@ import { useGlobalConfig } from '~/utils/globalConfig.js'
 const { siteName, icp, icpUrl } = useGlobalConfig();
 const router = useRouter()
 const user = ref({})
-const isLoading = ref(true)
 const copyTip = ref(false)
 const showApiKey = ref(false)
 const showToast = ref(false)
@@ -255,7 +249,6 @@ onMounted(() => {
   } else {
     router.push('/user/login')
   }
-  isLoading.value = false
 })
 </script>
 

@@ -211,7 +211,6 @@ import { ref, computed, onMounted } from "vue";
 import { useGlobalConfig } from "~/utils/globalConfig";
 import { useRouter } from "vue-router";
 import { getApiList, getGroupList } from "~/utils/api";
-import { useLoading } from "~/composables/useLoading";
 import { useMessage } from "~/composables/useMessage";
 
 // 网站名称
@@ -243,12 +242,10 @@ const error = ref(null);
  * 从服务器获取所有API及其分组信息
  */
 // 在组件顶部，与其它组合式函数一起调用
-const { startLoading, finishLoading } = useLoading();
 const { error: showError } = useMessage();
 
 const fetchApis = async () => {
   try {
-    startLoading("正在加载API列表...");
     error.value = null;
 
     // 获取API列表和分组列表
@@ -280,7 +277,6 @@ const fetchApis = async () => {
     error.value = err.message || "获取数据失败，请稍后重试";
     showError(error.value);
   } finally {
-    finishLoading();
   }
 };
 

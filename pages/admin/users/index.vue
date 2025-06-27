@@ -46,14 +46,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-if="loading">
-                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                  <div class="flex justify-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                  </div>
-                </td>
-              </tr>
-              <tr v-else-if="users.length === 0">
+              <tr v-if="users.length === 0">
                 <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
                   暂无数据
                 </td>
@@ -117,10 +110,7 @@
 
       <!-- Mobile List View -->
       <div class="sm:hidden space-y-3 p-4">
-        <div v-if="loading" class="flex justify-center p-6">
-          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-        <div v-else-if="users.length === 0" class="text-center p-6 text-base text-gray-500">
+        <div v-if="users.length === 0" class="text-center p-6 text-base text-gray-500">
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
@@ -381,7 +371,6 @@ import { getUserList } from "~/utils/api/index";
 
 const router = useRouter();
 const users = ref([]);
-const loading = ref(false);
 const messageModal = ref({ show: false, text: "", type: "info" });
 const deleteDialogVisible = ref(false);
 const deleteTarget = ref(null);
@@ -469,7 +458,6 @@ function showMessage(text, type = "info", duration = 3000) {
 
 // 获取用户列表
 async function fetchUsers() {
-  loading.value = true;
   try {
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user"))
@@ -502,7 +490,6 @@ async function fetchUsers() {
     console.error("获取用户列表失败:", error);
     showMessage(error.message || "获取用户列表失败", "error");
   } finally {
-    loading.value = false;
   }
 }
 

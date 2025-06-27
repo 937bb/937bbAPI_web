@@ -18,11 +18,6 @@ const EXCLUDE_LOADING_PATHS = [
   '/api/web/getUserList'
 ];
 
-// 是否应该显示加载状态
-function shouldShowLoading(path) {
-  return !EXCLUDE_LOADING_PATHS.some(p => path.includes(p));
-}
-
 /**
  * 封装的 fetch 请求方法
  * @param {string} path - 请求路径
@@ -32,8 +27,6 @@ function shouldShowLoading(path) {
 export async function $apiFetch(path, options = {}) {
   // 支持 path 以 http 开头
   const url = path.startsWith('http') ? path : (baseUrl + path);
-  const showLoading = shouldShowLoading(path);
-  const { startLoading, finishLoading } = useLoading();
   
   // 添加认证 token（如果存在）
   const headers = {
@@ -52,10 +45,6 @@ export async function $apiFetch(path, options = {}) {
     body = JSON.stringify(body);
   }
   
-  // 显示加载状态
-  if (showLoading) {
-    startLoading(options.loadingText || '加载中...');
-  }
   
   try {
     const controller = new AbortController();
@@ -115,9 +104,5 @@ export async function $apiFetch(path, options = {}) {
     
     throw new Error(errorMessage);
   } finally {
-    // 确保总是关闭加载状态
-    if (showLoading) {
-      finishLoading();
-    }
   }
 }

@@ -6,6 +6,7 @@
         v-if="showSplash" 
         :loading-text="splashLoadingText"
         :version="appVersion"
+        :show-animation="config.public.VITE_SPLASH_ANIMATION === 'true' || config.public.VITE_SPLASH_ANIMATION === true"
         @loaded="onSplashLoaded"
       />
       

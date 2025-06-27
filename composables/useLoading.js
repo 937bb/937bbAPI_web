@@ -1,3 +1,10 @@
+/*
+ * @Author: 937bb
+ * @email: 3535025404@qq.com
+ * @Date: 2025-06-26 17:32:12
+ * @LastEditors: 937bb
+ * @LastEditTime: 2025-06-27 13:28:07
+ */
 import { ref } from 'vue'
 
 // 创建全局状态

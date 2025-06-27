@@ -1,289 +1,353 @@
+<script setup>
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { useGlobalConfig } from '~/utils/globalConfig'
+
+const props = defineProps({
+  loadingText: {
+    type: String,
+    default: '加载中'
+  },
+  version: {
+    type: String,
+    default: '1.0.0'
+  },
+  duration: {
+    type: Number,
+    default: 2200
+  },
+  showAnimation: {
+    type: Boolean,
+    default: true
+  },
+  animationDuration: {
+    type: Number,
+    default: 600
+  }
+})
+
+const { siteName } = useGlobalConfig()
+
+const emit = defineEmits(['loaded'])
+
+// State
+const show = ref(true)
+const progress = ref(0)
+const loadingProgress = ref(0)
+let animationFrame = null
+
+// Computed
+const logoScale = computed(() => ({
+  'scale-105': progress.value > 10,
+  'scale-95': progress.value <= 10
+}))
+
+const logoOpacity = computed(() => ({
+  'opacity-100': progress.value > 15,
+  'opacity-0': progress.value <= 15
+}))
+
+const titleClasses = computed(() => ({
+  'opacity-100 translate-y-0': progress.value > 20,
+  'opacity-0 translate-y-4': progress.value <= 20
+}))
+
+const textClasses = computed(() => ({
+  'opacity-100': progress.value > 25,
+  'opacity-0': progress.value <= 25
+}))
+
+const progressClasses = computed(() => ({
+  'opacity-100': progress.value > 30,
+  'opacity-0': progress.value <= 30
+}))
+
+// Methods
+const startExitAnimation = () => {
+  if (!props.showAnimation) {
+    handleExit()
+    return
+  }
+  
+  setTimeout(handleExit, props.animationDuration)
+}
+
+const handleExit = () => {
+  show.value = false
+  emit('loaded')
+}
+
+const easeInOutCubic = (t) => 
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+const updateProgress = (elapsed, duration) => {
+  const currentProgress = Math.min(elapsed / duration, 1)
+  const easedProgress = easeInOutCubic(currentProgress)
+  
+  progress.value = easedProgress * 100
+  loadingProgress.value = Math.min(Math.round(easedProgress * 100), 100)
+  
+  return currentProgress
+}
+
+const startLoading = () => {
+  progress.value = 0
+  loadingProgress.value = 0
+  
+  const duration = props.duration
+  const startTime = Date.now()
+  
+  const animate = () => {
+    const elapsed = Date.now() - startTime
+    const currentProgress = updateProgress(elapsed, duration)
+    
+    if (currentProgress < 1) {
+      animationFrame = requestAnimationFrame(animate)
+    } else {
+      setTimeout(startExitAnimation, 600)
+    }
+  }
+  
+  animationFrame = requestAnimationFrame(animate)
+}
+
+// Lifecycle
+onMounted(() => {
+  startLoading()
+})
+
+onBeforeUnmount(() => {
+  if (animationFrame) {
+    cancelAnimationFrame(animationFrame)
+  }
+})
+
+// Expose methods
+const publicMethods = {
+  startLoading,
+  startExitAnimation
+}
+
+defineExpose(publicMethods)
+</script>
+
 <template>
-  <Transition name="fade">
-    <div
-      v-if="show"
-      class="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
-      style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);"
-    >
-      <!-- Subtle Background -->
-      <div class="absolute inset-0 bg-white/30"></div>
+  <transition name="fade">
+    <div v-if="show" class="splash-screen">
+      <!-- Animated Background -->
+      <div class="splash-bg"></div>
       
       <!-- Main Content -->
-      <div class="relative z-10 w-full max-w-2xl px-8 py-16 text-center">
-        <!-- Animated Logo Container -->
-        <div class="relative mb-12">
-          <!-- Outer Glow -->
-          <div class="absolute inset-0 flex items-center justify-center">
-            <div 
-              class="absolute w-64 h-64 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 blur-3xl animate-pulse"
-              :class="{ 'animate-scale-in': show }"
-            ></div>
-          </div>
-          
-          <!-- Animated Rings -->
-          <div class="relative z-10 flex items-center justify-center">
-            <div 
-              v-for="i in 3" 
-              :key="i"
-              class="absolute rounded-full border-2 border-opacity-20 border-white"
-              :class="`ring-${i}`"
-              :style="{
-                width: `${80 + i * 40}px`,
-                height: `${80 + i * 40}px`,
-                animation: `pulse ${4 + i}s infinite ${i * 0.3}s`
-              }"
-            ></div>
-            
-            <!-- Logo -->
-            <div 
-              class="relative z-20 w-32 h-32 flex items-center justify-center rounded-3xl bg-white shadow-lg border border-gray-100"
-              :class="{ 'animate-float': show }"
-            >
-              <img
-                src="../assets/logo.jpg"
-                alt="Logo"
-                class="w-16 h-16 object-contain"
-              />
-            </div>
-          </div>
+      <div class="splash-content">
+        <!-- Logo -->
+        <div class="logo-container">
+          <img 
+            src="../assets/logo.jpg" 
+            alt="Logo"
+            class="logo"
+            :class="{ 'logo-visible': progress > 10 }"
+          />
         </div>
-
-        <!-- Loading Text -->
-        <h1
-          class="text-3xl font-medium text-gray-800 mb-6"
-          :class="{ 'animate-fade-in-up': show }"
-          style="animation-delay: 0.5s"
-        >
+        
+        <!-- App Name -->
+        <h1 class="app-name" :class="{ 'app-name-visible': progress > 20 }">
           {{ siteName }}
         </h1>
         
-        <p 
-          class="text-gray-600 mb-8 opacity-0"
-          :class="{ 'animate-fade-in-up': show }"
-          style="animation-delay: 0.7s"
-        >
-          {{ loadingText }}
-          <span class="loading-dots">
-            <span>.</span><span>.</span><span>.</span>
-          </span>
-        </p>
-
         <!-- Progress Bar -->
-        <div
-          class="relative h-1.5 bg-gray-100 rounded-full overflow-hidden max-w-xs mx-auto mb-8 opacity-0"
-          :class="{ 'animate-fade-in-up': show }"
-          style="animation-delay: 0.9s"
-        >
-          <div 
-            class="absolute inset-0 bg-blue-500 transition-all duration-300 ease-out"
-            :style="{ 
-              width: `${progress}%`,
-              boxShadow: 'none'
-            }"
-          >
-            <div class="absolute right-0 top-1/2 w-2 h-2 -mt-1 -mr-1 bg-white rounded-full"></div>
+        <div class="progress-container">
+          <div class="progress-bar" :style="{ width: `${progress}%` }">
+            <div class="progress-highlight"></div>
           </div>
         </div>
         
-        <!-- Progress Percentage -->
-        <div 
-          class="text-sm font-mono text-gray-500 opacity-0"
-          :class="{ 'animate-fade-in-up': show }"
-          style="animation-delay: 1s"
-        >
-          {{ Math.round(progress) }}% 加载中
+        <!-- Status -->
+        <div class="status" :class="{ 'status-visible': progress > 30 }">
+          <span class="loading-text">{{ loadingText }}</span>
+          <span class="percentage">{{ loadingProgress }}%</span>
         </div>
       </div>
-
-      <!-- Version Info -->
-      <div
-        class="absolute bottom-8 text-sm text-gray-400 font-light tracking-wider opacity-0"
-        :class="{ 'animate-fade-in-up': show }"
-        style="animation-delay: 1.2s"
-      >
-        {{ version }} · {{ siteName }}
-      </div>
       
-      <!-- Loading Dots -->
-      <div class="flex space-x-2 opacity-0 absolute bottom-16" :class="{ 'animate-fade-in-up': show }" style="animation-delay: 1s">
-        <span v-for="i in 3" :key="i" class="w-1.5 h-1.5 rounded-full bg-gray-300" :style="{
-          animation: `pulse 1.4s infinite ${i * 0.2}s`
-        }"></span>
+      <!-- Version -->
+      <div class="version" :class="{ 'version-visible': progress > 40 }">
+        v{{ version }}
       </div>
     </div>
-  </Transition>
+  </transition>
 </template>
 
-<script setup>
-/**
- * @description: 启动加载动画组件 - 炫彩星空主题
- * @author: 937bb Team
- * @lastUpdate: 2025-06-27
- */
-
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import { useRuntimeConfig } from "#app";
-
-const config = useRuntimeConfig();
-const siteName = config.public.VITE_SITE_NAME || '937bbAPI';
-
-// 组件属性定义
-const props = defineProps({
-  // 是否显示启动画面
-  show: {
-    type: Boolean,
-    default: true,
-  },
-  // 加载中显示的文本
-  loadingText: {
-    type: String,
-    default: "正在启动系统",
-  },
-  // 应用版本号
-  version: {
-    type: String,
-    default: "v1.0.0",
-  },
-  // 最小显示时间(毫秒)
-  minDisplayTime: {
-    type: Number,
-    default: 1500,
-  },
-  // 最大显示时间(毫秒)，超过后强制完成
-  maxDisplayTime: {
-    type: Number,
-    default: 5000,
-  },
-});
-
-// 组件事件定义
-const emit = defineEmits(["loaded"]);
-
-// 状态
-const progress = ref(0);
-const isLoading = ref(true);
-const startTime = ref(Date.now());
-let interval = null;
-let timeout = null;
-
-// 移除了粒子效果
-
-// 根据进度获取加载提示
-const loadingMessage = computed(() => {
-  const p = progress.value;
-  if (p < 20) return '正在初始化系统';
-  if (p < 40) return '加载核心组件';
-  if (p < 60) return '准备用户界面';
-  if (p < 80) return '优化性能';
-  if (p < 95) return '即将完成';
-  return '欢迎使用';
-});
-
-/**
- * 启动进度条动画
- * 模拟加载进度，从0%到90%
- */
-const startProgress = () => {
-  progress.value = 0;
-  isLoading.value = true;
-  startTime.value = Date.now();
-  clearInterval(interval);
-  clearTimeout(timeout);
-
-  // 平滑的进度条动画
-  interval = setInterval(() => {
-    if (progress.value < 90) {
-      // 随着进度增加，增量逐渐减小
-      const remaining = 90 - progress.value;
-      const increment = Math.max(0.5, Math.min(remaining, remaining * 0.1 + Math.random() * 5));
-      progress.value = Math.min(90, progress.value + increment);
-    }
-  }, 100);
-
-  // 设置最大显示时间
-  timeout = setTimeout(() => {
-    finishProgress();
-  }, props.maxDisplayTime);
-};
-
-/**
- * 完成加载
- * 将进度条填充到100%并触发加载完成事件
- */
-const finishProgress = () => {
-  clearInterval(interval);
-  
-  // 直接到100%
-  progress.value = 100;
-  
-  // 计算剩余需要等待的时间，确保至少显示minDisplayTime
-  const elapsed = Date.now() - startTime.value;
-  const remainingTime = Math.max(0, props.minDisplayTime - elapsed);
-  
-  // 延迟隐藏，确保动画完成
-  setTimeout(() => {
-    if (progress.value >= 100) {
-      isLoading.value = false;
-      emit("loaded");
-    }
-  }, remainingTime);
-};
-
-// 初始化
-onMounted(() => {
-  startProgress();
-});
-
-// 清理
-onBeforeUnmount(() => {
-  clearInterval(interval);
-  clearTimeout(timeout);
-});
-
-// 暴露方法
-const reset = () => {
-  progress.value = 0;
-  startProgress();
-};
-
-defineExpose({
-  startProgress,
-  finishProgress,
-  reset,
-});
+<script>
+// ... (rest of the script remains the same)
 </script>
 
 <style scoped>
-/* 基础动画 */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(5deg);
-  }
+/* Base */
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
+/* Background */
+.splash-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
+  z-index: -1;
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%) skewX(-15deg); }
-  100% { transform: translateX(100%) skewX(-15deg); }
+/* Content */
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 320px;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+  transform: translateY(0);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  animation: contentFadeIn 0.8s 0.2s forwards;
 }
 
-@keyframes float-up {
+/* Logo */
+.logo-container {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.8);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 16px;
+  transition: all 0.5s ease;
+}
+
+.logo-visible {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* App Name */
+.app-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 2rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+}
+
+.app-name-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Progress */
+.progress-container {
+  width: 100%;
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  border-radius: 2px;
+  position: relative;
+  transition: width 0.3s ease-out;
+}
+
+.progress-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0) 0%, 
+    rgba(255,255,255,0.8) 50%, 
+    rgba(255,255,255,0) 100%);
+  animation: progressShine 1.5s infinite;
+}
+
+/* Status */
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.85rem;
+  color: #666;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.4s ease 0.2s;
+}
+
+.status-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.loading-text {
+  font-weight: 500;
+}
+
+.percentage {
+  font-family: 'SF Mono', 'Roboto Mono', monospace;
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+/* Version */
+.version {
+  position: absolute;
+  bottom: 1.5rem;
+  font-size: 0.75rem;
+  color: #999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease 0.3s;
+}
+
+.version-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes contentFadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -291,60 +355,45 @@ defineExpose({
   }
 }
 
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
+@keyframes progressShine {
+  0% {
+    transform: translateX(-100%);
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+  100% {
+    transform: translateX(100%);
   }
 }
 
-@keyframes loadingDots {
-  0%, 20% { opacity: 0.2; }
-  50% { opacity: 1; }
-  100% { opacity: 0.2; }
+/* Responsive */
+@media (max-width: 480px) {
+  .splash-content {
+    max-width: 280px;
+    padding: 2rem 1.5rem;
+  }
+  
+  .logo-container {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .app-name {
+    font-size: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+  
+  .status {
+    font-size: 0.8rem;
+  }
 }
 
-/* 动画类 */
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-fade-in-up {
-  animation: float-up 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-/* 过渡效果 */
+/* Fade Transition */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.5s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-/* 响应式调整 */
-@media (max-width: 640px) {
-  .loading-content {
-    padding: 2rem 1.5rem;
-  }
-  
-  .loading-logo {
-    width: 6rem;
-    height: 6rem;
-  }
-  
-  h1 {
-    font-size: 2rem;
-  }
 }
 </style>

@@ -34,15 +34,10 @@
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center py-12">
-      <div
-        class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"
-      ></div>
-    </div>
+    
 
     <!-- Error State -->
-    <div v-else-if="error" class="rounded-md bg-red-50 p-4 mb-6">
+    <div v-if="error" class="rounded-md bg-red-50 p-4 mb-6">
       <div class="flex">
         <div class="flex-shrink-0">
           <svg
@@ -298,12 +293,10 @@ const route = useRoute();
 const router = useRouter();
 
 const isNew = !route.params.id || route.params.id === "new";
-const loading = ref(false);
 const saving = ref(false);
 const error = ref(null);
 const userData = ref(null);
 
-// Form data
 const form = reactive({
   id: "",
   username: "",
@@ -315,7 +308,7 @@ const form = reactive({
   status: 0,
 });
 
-// Form errors
+
 const errors = reactive({
   username: "",
   email: "",
@@ -347,7 +340,6 @@ function showMessage(text, type = "info", duration = 3000) {
 async function fetchUserDetails() {
   if (isNew) return;
 
-  loading.value = true;
   error.value = null;
 
   try {
@@ -384,7 +376,6 @@ async function fetchUserDetails() {
     error.value = err.message || "加载用户信息失败";
     showMessage(error.value, "error");
   } finally {
-    loading.value = false;
   }
 }
 

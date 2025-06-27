@@ -269,7 +269,6 @@ import { getTodayStatistics } from "~/utils/api";
 import storage from '~/utils/storage';
 
 const router = useRouter();
-const loading = ref(false);
 
 // Mock data - replace with actual API calls
 const stats = ref({
@@ -303,7 +302,6 @@ const recentActivities = ref([
 // Fetch dashboard data
 const fetchDashboardData = async () => {
 	try {
-		loading.value = true;
 
 		// 从 storage 获取用户 token
 		const user = storage.getItem("user") || {};
@@ -329,7 +327,6 @@ const fetchDashboardData = async () => {
 	} catch (error) {
 		console.error("Failed to fetch dashboard data:", error);
 	} finally {
-		loading.value = false;
 	}
 };
 

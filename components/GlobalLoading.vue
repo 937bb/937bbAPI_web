@@ -1,3 +1,10 @@
+<!--
+ * @Author: 937bb
+ * @email: 3535025404@qq.com
+ * @Date: 2025-06-27 11:24:51
+ * @LastEditors: 937bb
+ * @LastEditTime: 2025-06-27 13:27:23
+-->
 <template>
   <Transition name="fade">
     <div 
@@ -6,7 +13,7 @@
     >
       <div class="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm flex items-center space-x-2">
         <div class="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <span class="text-sm text-gray-700">{{ loadingText }}</span>
+        <span class="text-sm text-gray-700">{{ loadingText}}</span>
         <span v-if="loadingProgress > 0" class="text-xs text-gray-500">
           {{ Math.round(loadingProgress) }}%
         </span>

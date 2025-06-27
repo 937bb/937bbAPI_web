@@ -71,7 +71,6 @@ import { useLoading } from '~/composables/useLoading'
 import { useMessage } from '~/composables/useMessage'
 const router = useRouter()
 const { login: userLogin } = useUser()
-const { startLoading, finishLoading, isLoading } = useLoading()
 const { success, error, warning } = useMessage()
 const form = ref({ account: '', password: '' })
 function validateAccount(account) {
@@ -92,7 +91,6 @@ const handleLogin = async () => {
   }
   
   try {
-    startLoading('正在登录...');
     const res = await login({
       account: form.value.account,
       passwd: form.value.password
@@ -108,7 +106,6 @@ const handleLogin = async () => {
   } catch (e) {
     error(e.message || '登录失败');
   } finally {
-    finishLoading();
   }
 };
 

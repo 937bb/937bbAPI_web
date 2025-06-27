@@ -28,7 +28,7 @@
 			</ul>
 
 			<!-- Empty State -->
-			<div v-if="!loading && groups.length === 0" class="text-center py-12">
+			<div v-if="groups.length === 0" class="text-center py-12">
 				<svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
 				</svg>
@@ -45,10 +45,6 @@
 				</div>
 			</div>
 
-			<!-- Loading State -->
-			<div v-if="loading" class="flex justify-center py-12">
-				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			</div>
 		</div>
 
 		<!-- Create/Edit Group Modal -->
@@ -170,7 +166,6 @@ import { ExclamationTriangleIcon, PlusIcon } from "@heroicons/vue/24/outline";
 import { getGroupList, addGroup, deleteGroup } from "~/utils/api";
 
 const router = useRouter();
-const loading = ref(true);
 const groups = ref([]);
 const showCreateModal = ref(false);
 const showDeleteModal = ref(false);
@@ -185,14 +180,12 @@ const groupForm = ref({
 // 加载分组列表
 const loadGroups = async () => {
 	try {
-		loading.value = true;
 		const response = await getGroupList();
 		groups.value = response.data || [];
 	} catch (error) {
 		console.error("加载分组失败:", error);
 		// 这里可以添加错误提示
 	} finally {
-		loading.value = false;
 	}
 };
 

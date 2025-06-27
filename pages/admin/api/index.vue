@@ -137,19 +137,8 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-if="loading">
-                <td
-                  colspan="7"
-                  class="px-6 py-4 text-center text-sm text-gray-500"
-                >
-                  <div class="flex justify-center">
-                    <div
-                      class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"
-                    ></div>
-                  </div>
-                </td>
-              </tr>
-              <tr v-else-if="apis.length === 0">
+             
+              <tr v-if="apis.length === 0">
                 <td
                   colspan="7"
                   class="px-6 py-4 text-center text-sm text-gray-500"
@@ -224,13 +213,9 @@
 
       <!-- Mobile List -->
       <div class="sm:hidden space-y-3 p-4">
-        <div v-if="loading" class="flex justify-center p-6">
-          <div
-            class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"
-          ></div>
-        </div>
+
         <div
-          v-else-if="apis.length === 0"
+          v-if="apis.length === 0"
           class="text-center p-6 text-base text-gray-500"
         >
           暂无数据
@@ -645,7 +630,6 @@ const showGroupManage = ref(false);
 const newGroupName = ref("");
 const groupError = ref("");
 const apis = ref([]);
-const loading = ref(false);
 
 const messageModal = ref({ show: false, text: "", type: "info" });
 function showMessage(text, type = "info", duration = 2000) {
@@ -663,7 +647,6 @@ async function fetchApis() {
     ? JSON.parse(localStorage.getItem("user"))
     : null;
   const token = user?.token || "";
-  loading.value = true;
   try {
     const res = await getApiList(token, {
       page: pagination.value.currentPage,
@@ -694,7 +677,6 @@ async function fetchApis() {
     pagination.value.total = 0;
     showMessage("获取API列表失败，请稍后重试", "error");
   } finally {
-    loading.value = false;
   }
 }
 
@@ -811,27 +793,27 @@ async function removeGroupHandler(group) {
       showMessage("无效的分组", "error");
       return;
     }
-    
+
     if (groupOptions.value.length <= 1) {
       showMessage("至少保留一个分组", "warn");
       return;
     }
-    
+
     if (!confirm(`确定删除分组"${group.title}"？`)) {
       return;
     }
-    
+
     const user = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user"))
       : null;
     const token = user?.token || "";
-    console.log(group.id)
+    console.log(group.id);
     const res = await deleteGroup(group.id, token);
     if (res.code !== 200) {
       showMessage(res.msg || "删除失败", "error");
       return;
     }
-    
+
     showMessage("删除成功", "success");
     fetchGroups();
   } catch (e) {
